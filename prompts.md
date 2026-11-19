@@ -29,3 +29,7 @@
 - **What you asked:** Replace Outputs with the listed timer, score, high score, level, radius, capacity percentage, and individual beam weights, displayed in boxes at the top of the screen.
 - **What changed:** Replaced the Outputs section in `spec.md` with the requested persistent top-of-screen boxes.
 - **Whether it worked:** Yes. The updated Outputs section is in place.
+## 7. Update the Look and feel section
+- **What you asked:** Add the worker-hit consequence to the Look and feel proposal and update the spec section.
+- **What changed:** Replaced the Look and feel section in `spec.md` with the proposal, including that a beam hit makes the worker fall and immediately fails the level.
+- **Whether it worked:** Yes. The updated section is in place.

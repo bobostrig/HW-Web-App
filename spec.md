@@ -81,8 +81,18 @@ Display these outputs in boxes that remain visible at the top of the screen duri
 - **Capacity:** Current beam’s weight as a percentage of the crane’s capacity at that radius.
 - **Beam weights:** Show each beam’s weight on or next to that individual beam.
 ## Look and feel
-tower crane to be operated on left with loads to the left of the tower crane and uncompleted steel tower to put loads in designated locations. Tower crane on the right side of the tower also placing loads that the operated crane can't hit
 
+Show the game in a 2D side view. The ground runs along the bottom of the screen, with a city skyline in the background. Place the unfinished steel tower in the middle, with one tower crane on each side.
+
+The player operates the crane on the left. It has a long boom, a box-shaped trolley that moves along the boom, and a cable hanging from the trolley. Show three empty spaces between the tower’s steel beams as the beam placement targets.
+
+The crane on the right is also in the foreground and clearly visible. It moves automatically, continuously placing its own beams. Those beams can sometimes get in the way of the player’s crane as the player places beams.
+
+Use realistic graphics and colors with a medium level of detail. Show a worker wearing red clothing and a hardhat, carrying a hammer, as he walks on the unfinished tower. If a beam hits the worker, show the worker falling and immediately mark the level as failed.
+
+Show black 2D birds flying in the sky. When a bird hits the cable, make the cable buckle and the load sway strongly.
+
+When capacity reaches 90%, make the capacity percentage box at the top of the screen flash red.
 ## Validation
 74.99 ft: the next radius ≥ 74.99 is 75, so the capacity is 13,000 and 0.9 × 13,000 = 11,700.
 75.01 ft: 75 < 75.01, so the next row is 100 ft, giving 9,000 and 0.9 × 9,000 = 8,100.
