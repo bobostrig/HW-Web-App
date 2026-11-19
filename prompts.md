@@ -14,3 +14,8 @@
 - **What you asked:** Change the purpose statement to say that the player operates the left crane, places three steel pieces on each of five increasingly difficult levels, and has three minutes per level.
 - **What changed:** Replaced the Purpose section in `spec.md` with that description and clarified that the game is inspired by load charts, not for real-world use.
 - **Whether it worked:** Yes. The revised Purpose section is in `spec.md`.
+
+## 4. Replace the Inputs section
+- **What you asked:** Replace the Inputs section with the proposed controls and interaction description.
+- **What changed:** Updated the Inputs section in `spec.md` with the reviewed wording covering keyboard controls, movement limits, pickup and release, target placement, and load sway.
+- **Whether it worked:** Yes. The Inputs section was replaced.

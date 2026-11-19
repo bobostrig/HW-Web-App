@@ -1,8 +1,8 @@
 ## Purpose
 A crane operation game where the player uses the left tower crane to place three steel pieces in their highlighted target locations on each of five increasingly difficult levels. Each level has a three-minute time limit. The player must manage the load's changing capacity as the crane reaches farther out. This is a simple game inspired by crane load charts, not a tool for real-world crane operation.
 ## Inputs
-Turn the crane to left and right. move the trolleyin and out and raise and lower the hook
 
+Use either the arrow keys or WASD to move the crane controls. Move the crane left and right, move the trolley along the boom, and raise or lower the hook. The trolley cannot travel past the boom�s ends, and the hook can move from ground level up to the boom. The crane moves at a steady, moderate speed. Press Space to pick up a beam when the hook is positioned to do so, or to release a carried beam. Only one beam can be carried at a time. When a target location is highlighted, releasing the beam with Space places it there automatically. The player cannot steady a swaying load.
 ## Calculations
 Radius (ft)	Capacity (lb)
 50ft-20,000
@@ -33,3 +33,4 @@ Not for communication just for fun and simple. Not for real world use
 ## Features
 1. There will be a guy walking on the uncompleted tower in red that you can't hit
 2. There will be birds flying in the sky that when they hit the cable holding the load it sways a lot
+
