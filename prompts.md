@@ -9,3 +9,8 @@
 - **What you asked:** Create `spec.md`, `prompts.md`, and `index.html`; after each request, log what you asked, what changed, and whether it worked.
 - **What changed:** Added this request log, a starter specification noting that app behavior is still to be defined, and a minimal responsive HTML app shell at the root.
 - **Whether it worked:** Yes. All three requested files were created at the project root.
+
+## 3. Update the purpose statement
+- **What you asked:** Change the purpose statement to say that the player operates the left crane, places three steel pieces on each of five increasingly difficult levels, and has three minutes per level.
+- **What changed:** Replaced the Purpose section in `spec.md` with that description and clarified that the game is inspired by load charts, not for real-world use.
+- **Whether it worked:** Yes. The revised Purpose section is in `spec.md`.

@@ -1,6 +1,5 @@
 ## Purpose
-A crane game where like a real crane it has less capacity the farther out the load is with different weights to pick up.
-
+A crane operation game where the player uses the left tower crane to place three steel pieces in their highlighted target locations on each of five increasingly difficult levels. Each level has a three-minute time limit. The player must manage the load's changing capacity as the crane reaches farther out. This is a simple game inspired by crane load charts, not a tool for real-world crane operation.
 ## Inputs
 Turn the crane to left and right. move the trolleyin and out and raise and lower the hook
 
