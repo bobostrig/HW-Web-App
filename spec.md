@@ -70,10 +70,16 @@ W_i < min(C(r) for r in R_i)
 
 Generate beam weights and locations so this condition holds for all three beams. This keeps each generated task below the 100% tip-over threshold.
 ## Outputs
-3 miute timer
-score
-capacity in %
 
+Display these outputs in boxes that remain visible at the top of the screen during play:
+
+- **Timer:** Time remaining in the current level’s three-minute limit.
+- **Score:** Player’s current score.
+- **High score:** Highest score achieved.
+- **Level:** Current level out of five.
+- **Radius:** Current load radius in feet.
+- **Capacity:** Current beam’s weight as a percentage of the crane’s capacity at that radius.
+- **Beam weights:** Show each beam’s weight on or next to that individual beam.
 ## Look and feel
 tower crane to be operated on left with loads to the left of the tower crane and uncompleted steel tower to put loads in designated locations. Tower crane on the right side of the tower also placing loads that the operated crane can't hit
 

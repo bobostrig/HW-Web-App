@@ -24,3 +24,8 @@
 - **What you asked:** Replace the Calculations section with the combined proposal, including the capacity chart, formulas, warning and tip-over thresholds, and beam-generation feasibility rules.
 - **What changed:** Replaced the Calculations section in `spec.md` with the combined proposal.
 - **Whether it worked:** Yes. The new section is in place.
+
+## 6. Replace the Outputs section
+- **What you asked:** Replace Outputs with the listed timer, score, high score, level, radius, capacity percentage, and individual beam weights, displayed in boxes at the top of the screen.
+- **What changed:** Replaced the Outputs section in `spec.md` with the requested persistent top-of-screen boxes.
+- **Whether it worked:** Yes. The updated Outputs section is in place.
