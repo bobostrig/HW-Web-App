@@ -19,3 +19,8 @@
 - **What you asked:** Replace the Inputs section with the proposed controls and interaction description.
 - **What changed:** Updated the Inputs section in `spec.md` with the reviewed wording covering keyboard controls, movement limits, pickup and release, target placement, and load sway.
 - **Whether it worked:** Yes. The Inputs section was replaced.
+
+## 5. Replace the Calculations section
+- **What you asked:** Replace the Calculations section with the combined proposal, including the capacity chart, formulas, warning and tip-over thresholds, and beam-generation feasibility rules.
+- **What changed:** Replaced the Calculations section in `spec.md` with the combined proposal.
+- **Whether it worked:** Yes. The new section is in place.
