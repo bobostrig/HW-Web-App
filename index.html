@@ -313,11 +313,17 @@
       const status = document.getElementById("game-status");
       const targetElements = [1, 2, 3].map((number) => document.getElementById(`target-${number}`));
       const targetYs = [410.5, 328.5, 274.5].map((y) => 510 + 1.5 * (y - 510));
+      const beamSpawnX = [270, 500, 620];
       const beams = [
-        { id: 1, x: 270, weight: 8000, element: document.getElementById("beam-1") },
-        { id: 2, x: 500, weight: 6500, element: document.getElementById("beam-2") },
-        { id: 3, x: 620, weight: 5000, element: document.getElementById("beam-3") }
-      ].map((beam) => ({ ...beam, state: "ground", stand: beam.element.querySelector(".beam-stand") }));
+        { id: 1, weight: 8000, element: document.getElementById("beam-1") },
+        { id: 2, weight: 6500, element: document.getElementById("beam-2") },
+        { id: 3, weight: 5000, element: document.getElementById("beam-3") }
+      ].map((beam, index) => ({
+        ...beam,
+        x: beamSpawnX[index],
+        state: "ground",
+        stand: beam.element.querySelector(".beam-stand")
+      }));
       const keys = new Set();
       const trolleyHome = 528;
       const mastPivot = 310;

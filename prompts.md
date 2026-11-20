@@ -109,3 +109,7 @@
 - **What you asked:** Make the mirror transition slow and make it look like the crane is turning.
 - **What changed:** Replaced the instant mirror with a 1.6-second eased horizontal turn through an edge-on position. The trolley and carried beam remain attached while the turn runs, and trolley movement pauses until it finishes. Updated `spec.md` to describe the slow turn.
 - **Whether it worked:** The player crane now animates its turn between orientations.
+## 27. Set beam spawn sides
+- **What you asked:** Ensure one beam spawns to the left of the player crane and two spawn to the right.
+- **What changed:** Made the initial beam spawn positions explicit in the game logic and added the one-left/two-right rule to the beam generation specification.
+- **Whether it worked:** The three spawn positions are set to one left and two right of the crane mast.

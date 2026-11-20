@@ -54,7 +54,7 @@ the crane falls over dramatically, crashes into the tower being built, and the t
 
 ### Beam generation and route feasibility
 
-At the start of each level, generate three beams, each with a weight `W_i`, a pickup radius `r_p,i`, and a target radius `r_t,i`, where `i` is 1, 2, or 3.
+At the start of each level, generate three beams, each with a weight `W_i`, a pickup radius `r_p,i`, and a target radius `r_t,i`, where `i` is 1, 2, or 3. Spawn one beam on the left side of the player crane mast and the other two on the right side.
 
 For each beam, check capacity at pickup and continuously along the trolley�s route to its target. Let `R_i` be the set of radii the beam passes through while being carried. The beam is feasible only if:
 
