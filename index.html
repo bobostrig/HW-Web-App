@@ -83,6 +83,8 @@
     .hud-value small { color: #aabac3; font-size: 8px; font-weight: 600; letter-spacing: 0; }
     .hud-card.timer .hud-value { color: var(--amber); }
     .hud-card.capacity .hud-value { color: var(--cyan); }
+    .hud-card.capacity.warning { border-color: #ff5e59; animation: capacity-flash .55s steps(2, end) infinite; }
+    @keyframes capacity-flash { 50% { background: rgb(126 30 32 / 95%); box-shadow: 0 0 18px rgb(255 75 70 / 65%); } }
 
     .game-frame {
       position: relative;
@@ -92,6 +94,38 @@
       background: #172b38;
       box-shadow: 0 24px 70px rgb(0 0 0 / 32%);
     }
+
+    .fail-panel {
+      display: none;
+      position: absolute;
+      z-index: 4;
+      top: 50%;
+      left: 50%;
+      width: min(280px, calc(100% - 28px));
+      padding: 15px 18px;
+      transform: translate(-50%, -50%);
+      border: 1px solid rgb(255 255 255 / 24%);
+      border-radius: 12px;
+      background: rgb(9 20 29 / 95%);
+      box-shadow: 0 14px 38px rgb(0 0 0 / 45%);
+      text-align: center;
+    }
+
+    .fail-panel strong { display: block; color: #ff8980; font-size: 13px; letter-spacing: .15em; text-transform: uppercase; }
+    .reset-button {
+      margin-top: 11px;
+      padding: 9px 17px;
+      border: 0;
+      border-radius: 7px;
+      background: #f1bd68;
+      color: #19252c;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .reset-button:hover { background: #ffd389; }
+    .reset-button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 
     .scene { display: block; width: 100%; height: auto; aspect-ratio: 1440 / 660; }
     .scene text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
@@ -145,8 +179,8 @@
         <div class="hud-card"><span class="hud-label">Score</span><span class="hud-value">0</span></div>
         <div class="hud-card"><span class="hud-label">High score</span><span class="hud-value">0</span></div>
         <div class="hud-card"><span class="hud-label">Level</span><span class="hud-value">1 <small>/ 5</small></span></div>
-        <div class="hud-card"><span class="hud-label">Radius</span><span class="hud-value">42 <small>ft</small></span></div>
-        <div class="hud-card capacity"><span class="hud-label">Capacity</span><span class="hud-value">0<small>%</small></span></div>
+        <div class="hud-card"><span class="hud-label">Radius</span><span class="hud-value"><span id="radius-value">42</span> <small>ft</small></span></div>
+        <div class="hud-card capacity" id="capacity-card"><span class="hud-label">Capacity</span><span class="hud-value"><span id="capacity-value">0</span><small>% · <span id="max-capacity-value">20,000 lb</span> max</small></span></div>
         <div class="hud-card beams"><span class="hud-label">Steel pieces</span><span class="hud-value">3 <small>to place</small></span></div>
       </section>
       <svg class="scene" viewBox="0 0 1440 660" role="img" aria-labelledby="scene-title scene-desc" xmlns="http://www.w3.org/2000/svg">
@@ -198,6 +232,7 @@
           <path d="M605 480h224v13H605z" fill="#829095"/>
         </g>
 
+        <g id="tower-collapse">
         <!-- Unfinished tower: legs, cross braces, three highlighted bays -->
         <g transform="translate(0 510) scale(1 1.5) translate(0 -510)" stroke="url(#steel)" stroke-linecap="square">
           <path d="M625 480V261M815 480V261" fill="none" stroke-width="17"/>
@@ -214,6 +249,7 @@
           <text x="720" y="416">TARGET 01</text><text x="720" y="334">TARGET 02</text><text x="720" y="279">TARGET 03</text>
         </g>
         <path d="M625 261V230m190 31v-31" transform="translate(0 510) scale(1 1.5) translate(0 -510)" stroke="#819196" stroke-width="8"/>
+        </g>
 
         <!-- Player crane on the left -->
         <g id="player-crane" transform="translate(0 510) scale(1 1.3) translate(0 -510)">
@@ -243,24 +279,24 @@
           <rect x="-32" y="465" width="65" height="13" rx="2" fill="#9ba8a7" stroke="#33464e" stroke-width="3"/>
           <path d="M-21 465v13m43-13v13" stroke="#4c616a" stroke-width="3"/>
           <rect x="-42" y="440" width="84" height="23" rx="11" fill="#14252e" stroke="#61747a"/>
-          <text x="0" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">8,000 lb</text>
+          <text id="beam-weight-1" x="0" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">8,000 lb</text>
         </g>
         <g id="beam-2" transform="translate(500 0)">
           <path class="beam-stand" d="M0 499v-18m-12 18h24" stroke="#293b43" stroke-width="3"/>
           <rect x="-32" y="465" width="65" height="13" rx="2" fill="#879797" stroke="#33464e" stroke-width="3"/>
           <path d="M-21 465v13m43-13v13" stroke="#4c616a" stroke-width="3"/>
           <rect x="-42" y="440" width="84" height="23" rx="11" fill="#14252e" stroke="#61747a"/>
-          <text x="0" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">6,500 lb</text>
+          <text id="beam-weight-2" x="0" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">6,500 lb</text>
         </g>
         <g id="beam-3" transform="translate(620 0)">
           <path class="beam-stand" d="M0 499v-18m-12 18h24" stroke="#293b43" stroke-width="3"/>
           <rect x="-32" y="465" width="65" height="13" rx="2" fill="#aab5b0" stroke="#33464e" stroke-width="3"/>
           <path d="M-21 465v13m43-13v13" stroke="#4c616a" stroke-width="3"/>
           <rect x="-42" y="440" width="84" height="23" rx="11" fill="#14252e" stroke="#61747a"/>
-          <text x="0" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">5,000 lb</text>
+          <text id="beam-weight-3" x="0" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">5,000 lb</text>
         </g>
         <!-- Worker on a tower beam -->
-        <g transform="translate(0 510) scale(1 1.5) translate(0 -510) translate(746 335) scale(1 .9)" stroke-linecap="round" stroke-linejoin="round">
+        <g id="tower-worker" transform="translate(0 510) scale(1 1.5) translate(0 -510) translate(746 335) scale(1 .9)" stroke-linecap="round" stroke-linejoin="round">
           <path d="M-6 27v18m8-18 9 17" stroke="#35444a" stroke-width="5"/>
           <path d="M-8 9h15l5 20H-12z" fill="#c7463b" stroke="#792f2b" stroke-width="2"/>
           <path d="M-4 8-12 19m19-10 9 8" fill="none" stroke="#c7463b" stroke-width="5"/>
@@ -292,15 +328,26 @@
           <path d="m902 116 10-9 10 9 10-9 10 9"/><path d="m977 157 8-7 8 7 8-7 8 7"/><path d="m853 176 7-6 7 6 7-6 7 6"/>
         </g>
 
+        <g id="crash-overlay" display="none" text-anchor="middle">
+          <rect width="1440" height="660" fill="#08131d" opacity=".58"/>
+          <text x="720" y="286" fill="#ff766d" font-size="20" font-weight="900" letter-spacing="5">LOAD LIMIT EXCEEDED</text>
+          <text x="720" y="338" fill="#fff6e7" font-size="42" font-weight="900" letter-spacing="3">LEVEL FAILED</text>
+        </g>
+        <g id="debris" display="none" aria-hidden="true"></g>
+
         <path d="M0 510h1440" stroke="#f2dbab" stroke-opacity=".16" stroke-width="1"/>
       </svg>
+      <div class="fail-panel" id="fail-panel" role="group" aria-label="Level failed">
+        <strong>Level failed</strong>
+        <button class="reset-button" id="reset-level" type="button">Restart level</button>
+      </div>
     </section>
 
     <footer class="footer-bar">
       <div class="beam-legend" aria-label="Beam weights">
-        <span class="beam-chip">Beam 1 <strong>8,000 lb</strong></span>
-        <span class="beam-chip">Beam 2 <strong>6,500 lb</strong></span>
-        <span class="beam-chip">Beam 3 <strong>5,000 lb</strong></span>
+        <span class="beam-chip">Beam 1 <strong id="beam-summary-1">8,000 lb</strong></span>
+        <span class="beam-chip">Beam 2 <strong id="beam-summary-2">6,500 lb</strong></span>
+        <span class="beam-chip">Beam 3 <strong id="beam-summary-3">5,000 lb</strong></span>
       </div>
       <div class="status"><span class="status-dot" aria-hidden="true"></span><span id="game-status" aria-live="polite">Arrows / WASD move trolley and hook · Space picks up or releases</span></div>
     </footer>
@@ -311,22 +358,82 @@
       const hoistLine = document.getElementById("hoist-line");
       const hook = document.getElementById("hook");
       const status = document.getElementById("game-status");
+      const radiusValue = document.getElementById("radius-value");
+      const capacityValue = document.getElementById("capacity-value");
+      const capacityCard = document.getElementById("capacity-card");
+      const playerCrane = document.getElementById("player-crane");
+      const towerCollapse = document.getElementById("tower-collapse");
+      const crashOverlay = document.getElementById("crash-overlay");
+      const debrisGroup = document.getElementById("debris");
+      const failPanel = document.getElementById("fail-panel");
       const targetElements = [1, 2, 3].map((number) => document.getElementById(`target-${number}`));
       const targetYs = [410.5, 328.5, 274.5].map((y) => 510 + 1.5 * (y - 510));
-      const beamSpawnX = [270, 500, 620];
+      const beamSpawnRanges = [[235, 285], [360, 470], [520, 660]];
+      const mastPivot = 310;
+      let currentLevel = 1;
+      const targetX = 720;
+
+      function capacityAtRadius(radius) {
+        const chart = [
+          { radius: 0, capacity: 20000 },
+          { radius: 50, capacity: 20000 },
+          { radius: 75, capacity: 13000 },
+          { radius: 100, capacity: 9000 },
+          { radius: 125, capacity: 7000 },
+          { radius: 150, capacity: 5500 }
+        ];
+        if (radius <= 0) return chart[0].capacity;
+        for (let index = 1; index < chart.length; index += 1) {
+          const upper = chart[index];
+          const lower = chart[index - 1];
+          if (radius <= upper.radius) {
+            const fraction = (radius - lower.radius) / (upper.radius - lower.radius);
+            return lower.capacity + fraction * (upper.capacity - lower.capacity);
+          }
+        }
+        return chart[chart.length - 1].capacity;
+      }
+
+      function radiusAtScreenX(x) {
+        return Math.min(150, Math.abs(x - mastPivot) / 500 * 150);
+      }
+
+      function routeCapacity(startX, endX) {
+        const farthestRadius = Math.max(radiusAtScreenX(startX), radiusAtScreenX(endX));
+        return capacityAtRadius(farthestRadius);
+      }
+
+      function generateBeamWeight(startX, endX, level) {
+        const routeLimit = routeCapacity(startX, endX);
+        const maximum = Math.floor((routeLimit * Math.min(.94, .82 + (level - 1) * .03)) / 250) * 250;
+        const minimum = Math.floor((routeLimit * .5) / 250) * 250;
+        const increments = Math.max(1, Math.floor((maximum - minimum) / 250) + 1);
+        return minimum + Math.floor(Math.random() * increments) * 250;
+      }
+
+      function generateTipRiskWeight(startX, endX, level) {
+        const routeLimit = routeCapacity(startX, endX);
+        const minimum = capacityAtRadius(150) + 250;
+        const maximum = Math.floor((routeLimit * Math.min(.94, .82 + (level - 1) * .03)) / 250) * 250;
+        if (maximum < minimum) return generateBeamWeight(startX, endX, level);
+        const increments = Math.floor((maximum - minimum) / 250) + 1;
+        return minimum + Math.floor(Math.random() * increments) * 250;
+      }
+
       const beams = [
-        { id: 1, weight: 8000, element: document.getElementById("beam-1") },
-        { id: 2, weight: 6500, element: document.getElementById("beam-2") },
-        { id: 3, weight: 5000, element: document.getElementById("beam-3") }
+        { id: 1, element: document.getElementById("beam-1") },
+        { id: 2, element: document.getElementById("beam-2") },
+        { id: 3, element: document.getElementById("beam-3") }
       ].map((beam, index) => ({
         ...beam,
-        x: beamSpawnX[index],
+        spawnRange: beamSpawnRanges[index],
+        x: 0,
+        weight: 0,
         state: "ground",
         stand: beam.element.querySelector(".beam-stand")
       }));
       const keys = new Set();
       const trolleyHome = 528;
-      const mastPivot = 310;
       let trolleyX = trolleyHome;
       let hookY = 333;
       let craneOrientation = 1;
@@ -339,7 +446,27 @@
       let carriedBeam = null;
       let activeTargets = [];
       const filledTargets = new Set();
+      let gameOver = false;
       let previousFrame = 0;
+
+      function spawnLevelBeams(level) {
+        carriedBeam = null;
+        filledTargets.clear();
+        beams.forEach((beam) => {
+          const [minimumX, maximumX] = beam.spawnRange;
+          const steps = Math.round((maximumX - minimumX) / 5);
+          beam.x = minimumX + Math.floor(Math.random() * (steps + 1)) * 5;
+          beam.weight = beam.id === 3
+            ? generateTipRiskWeight(beam.x, targetX, level)
+            : generateBeamWeight(beam.x, targetX, level);
+          beam.state = "ground";
+          beam.element.setAttribute("transform", `translate(${beam.x} 0)`);
+          beam.stand.setAttribute("visibility", "visible");
+          document.getElementById(`beam-weight-${beam.id}`).textContent = `${beam.weight.toLocaleString()} lb`;
+          document.getElementById(`beam-summary-${beam.id}`).textContent = `${beam.weight.toLocaleString()} lb`;
+        });
+      }
+      spawnLevelBeams(currentLevel);
 
       function hookScreenY() {
         return 510 + 1.3 * (hookY - 510);
@@ -351,6 +478,192 @@
 
       function setStatus(message) {
         status.textContent = message;
+      }
+
+      function setFallingTransform(element, scaleX, angle, pivotX, pivotY) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        const a = scaleX;
+        const b = 0;
+        const c = 0;
+        const d = element === playerCrane ? 1.3 : 1;
+        const e = element === playerCrane ? mastPivot * (1 - scaleX) : 0;
+        const f = element === playerCrane ? -153 : 0;
+        const ra = cos * a - sin * b;
+        const rb = sin * a + cos * b;
+        const rc = cos * c - sin * d;
+        const rd = sin * c + cos * d;
+        const re = pivotX - cos * pivotX + sin * pivotY + cos * e - sin * f;
+        const rf = pivotY - sin * pivotX - cos * pivotY + sin * e + cos * f;
+        element.setAttribute("transform", `matrix(${ra} ${rb} ${rc} ${rd} ${re} ${rf})`);
+      }
+
+      function createBreakawayPieces() {
+        debrisGroup.replaceChildren();
+        const pieces = [];
+        function addSegment(x1, y1, x2, y2, thickness, color) {
+          const x = (x1 + x2) / 2;
+          const y = (y1 + y2) / 2;
+          const length = Math.hypot(x2 - x1, y2 - y1);
+          const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+          const element = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          element.setAttribute("x", String(x - length / 2));
+          element.setAttribute("y", String(y - thickness / 2));
+          element.setAttribute("width", String(length));
+          element.setAttribute("height", String(thickness));
+          element.setAttribute("rx", "2");
+          element.setAttribute("fill", color);
+          element.setAttribute("stroke", "#24363d");
+          element.setAttribute("stroke-width", "2");
+          element.setAttribute("transform", `rotate(${angle} ${x} ${y})`);
+          debrisGroup.appendChild(element);
+          pieces.push({ element, x, y, angle, vx: Math.random() * 130 - 65, vy: Math.random() * 20 - 25, spin: Math.random() * 130 - 65 });
+        }
+        const towerPoint = (x, y) => ({ x, y: 510 + 1.5 * (y - 510) });
+        const playerPoint = (x, y) => ({ x: mastPivot + (x - mastPivot) * visualScaleX, y: 1.3 * y - 153 });
+        const towerColor = "#71838a";
+        const craneColor = "#d0a257";
+
+        const towerLevels = [261, 294, 376, 458, 480];
+        [625, 815].forEach((x) => {
+          for (let index = 0; index < towerLevels.length - 1; index += 1) {
+            const top = towerPoint(x, towerLevels[index]);
+            const bottom = towerPoint(x, towerLevels[index + 1]);
+            addSegment(top.x, top.y, bottom.x, bottom.y, 10, towerColor);
+          }
+        });
+        towerLevels.slice(0, 4).forEach((y) => {
+          const middle = (617 + 823) / 2;
+          const left = towerPoint(617, y);
+          const center = towerPoint(middle, y);
+          const right = towerPoint(823, y);
+          addSegment(left.x, left.y, center.x, center.y, 9, "#9aa6a6");
+          addSegment(center.x, center.y, right.x, right.y, 9, "#9aa6a6");
+        });
+        [[458, 376], [376, 294], [294, 261]].forEach(([lower, upper]) => {
+          [[625, lower, 815, upper], [815, lower, 625, upper]].forEach(([x1, y1, x2, y2]) => {
+            const start = towerPoint(x1, y1);
+            const end = towerPoint(x2, y2);
+            addSegment(start.x, start.y, end.x, end.y, 6, "#586e78");
+          });
+        });
+
+        const mastLevels = [168, 230, 294, 358, 422, 486, 510];
+        [286, 334].forEach((x) => {
+          for (let index = 0; index < mastLevels.length - 1; index += 1) {
+            const start = playerPoint(x, mastLevels[index]);
+            const end = playerPoint(x, mastLevels[index + 1]);
+            addSegment(start.x, start.y, end.x, end.y, 8, "#89999b");
+          }
+        });
+        for (let x = 221; x < 817; x += 65) {
+          const nextX = Math.min(x + 65, 817);
+          [156, 175].forEach((y) => {
+            const start = playerPoint(x, y);
+            const end = playerPoint(nextX, y);
+            addSegment(start.x, start.y, end.x, end.y, 6, craneColor);
+          });
+          const braceStart = playerPoint(x, 156);
+          const braceEnd = playerPoint(Math.min(x + 42, 817), 175);
+          addSegment(braceStart.x, braceStart.y, braceEnd.x, braceEnd.y, 4, "#a68149");
+        }
+        [[190, 130, 229, 130], [190, 175, 229, 175], [190, 130, 190, 175], [229, 130, 229, 175], [195, 144, 224, 144], [195, 160, 224, 160]].forEach(([x1, y1, x2, y2]) => {
+          const start = playerPoint(x1, y1);
+          const end = playerPoint(x2, y2);
+          addSegment(start.x, start.y, end.x, end.y, 7, "#66594a");
+        });
+        [[507, 147, 549, 147], [507, 175, 549, 175], [507, 147, 507, 175], [549, 147, 549, 175]].forEach(([x1, y1, x2, y2]) => {
+          const start = playerPoint(x1, y1);
+          const end = playerPoint(x2, y2);
+          addSegment(start.x, start.y, end.x, end.y, 6, craneColor);
+        });
+        return pieces;
+      }
+
+      function startCollapse() {
+        if (gameOver) return;
+        gameOver = true;
+        turning = false;
+        keys.clear();
+        setStatus("Load limit exceeded. The crane and tower are collapsing.");
+        const startedAt = performance.now();
+        const scaleX = visualScaleX;
+        const debris = createBreakawayPieces();
+        debrisGroup.setAttribute("display", "inline");
+        function fall(frameTime) {
+          const elapsed = (frameTime - startedAt) / 1000;
+          const progress = Math.min(elapsed / 1.05, 1);
+          const eased = progress * progress * (3 - 2 * progress);
+          setFallingTransform(playerCrane, scaleX, -0.95 * eased, mastPivot, 510);
+          setFallingTransform(towerCollapse, 1, 0.42 * eased, 720, 510);
+          playerCrane.setAttribute("opacity", String(1 - eased));
+          towerCollapse.setAttribute("opacity", String(1 - eased));
+          document.getElementById("tower-worker").setAttribute("opacity", String(1 - eased));
+          debris.forEach((item) => {
+            const t = elapsed;
+            const y = Math.min(615, item.y + item.vy * t + 210 * t * t);
+            const x = item.x + item.vx * t;
+            const angle = item.spin * t;
+            item.element.setAttribute("transform", `translate(${x - item.x} ${y - item.y}) rotate(${angle} ${item.x} ${item.y})`);
+            item.element.setAttribute("opacity", String(eased));
+          });
+          if (elapsed < 1.9) requestAnimationFrame(fall);
+          else {
+            playerCrane.setAttribute("opacity", "0");
+            towerCollapse.setAttribute("opacity", "0");
+            document.getElementById("tower-worker").setAttribute("opacity", "0");
+            crashOverlay.setAttribute("display", "inline");
+            failPanel.style.display = "block";
+            setStatus("Level failed: crane exceeded its load capacity.");
+          }
+        }
+        requestAnimationFrame(fall);
+      }
+
+      function resetLevel() {
+        gameOver = false;
+        turning = false;
+        turnFrom = 1;
+        turnTo = 1;
+        turnStartedAt = 0;
+        craneOrientation = 1;
+        visualScaleX = 1;
+        trolleyX = trolleyHome;
+        hookY = 333;
+        carriedBeam = null;
+        activeTargets = [];
+        keys.clear();
+        previousFrame = 0;
+        filledTargets.clear();
+        targetElements.forEach((target) => {
+          target.setAttribute("stroke", "#77d9df");
+          target.setAttribute("stroke-width", "3");
+          target.setAttribute("stroke-dasharray", "7 6");
+        });
+        playerCrane.removeAttribute("opacity");
+        towerCollapse.removeAttribute("opacity");
+        document.getElementById("tower-worker").removeAttribute("opacity");
+        towerCollapse.removeAttribute("transform");
+        crashOverlay.setAttribute("display", "none");
+        failPanel.style.display = "none";
+        debrisGroup.replaceChildren();
+        debrisGroup.setAttribute("display", "none");
+        capacityCard.classList.remove("warning");
+        spawnLevelBeams(currentLevel);
+        setStatus(`Level ${currentLevel} restarted. Move the trolley and hook, then press Space to pick up a beam.`);
+        render();
+        requestAnimationFrame(update);
+      }
+
+      function updateCapacity() {
+        const radius = radiusAtScreenX(trolleyScreenX());
+        const capacity = capacityAtRadius(radius);
+        const percentage = carriedBeam ? carriedBeam.weight / capacity * 100 : 0;
+        radiusValue.textContent = radius.toFixed(1);
+        capacityValue.textContent = String(Math.round(percentage));
+        document.getElementById("max-capacity-value").textContent = `${Math.round(capacity).toLocaleString()} lb`;
+        capacityCard.classList.toggle("warning", percentage >= 90 && percentage < 100);
+        if (percentage >= 100) startCollapse();
       }
 
       function updateTargetHighlight() {
@@ -373,10 +686,11 @@
       }
 
       function render() {
-        const playerCrane = document.getElementById("player-crane");
-        if (!turning) visualScaleX = craneOrientation;
-        const translateX = mastPivot * (1 - visualScaleX);
-        playerCrane.setAttribute("transform", `matrix(${visualScaleX} 0 0 1.3 ${translateX} -153)`);
+        if (!gameOver) {
+          if (!turning) visualScaleX = craneOrientation;
+          const translateX = mastPivot * (1 - visualScaleX);
+          playerCrane.setAttribute("transform", `matrix(${visualScaleX} 0 0 1.3 ${translateX} -153)`);
+        }
         craneTrolley.setAttribute("transform", `translate(${trolleyX - trolleyHome} 0)`);
         hoistLine.setAttribute("d", `M528 175V${hookY}`);
         hook.setAttribute("transform", `translate(0 ${hookY - 333})`);
@@ -384,10 +698,12 @@
           const top = hookScreenY();
           carriedBeam.element.setAttribute("transform", `translate(${trolleyScreenX()} ${top - 465})`);
         }
+        updateCapacity();
         updateTargetHighlight();
       }
 
       function toggleBeam() {
+        if (gameOver) return;
         if (turning) {
           setStatus("Wait for the crane to finish turning.");
           return;
@@ -432,6 +748,7 @@
       }
 
       function update(frameTime) {
+        if (gameOver) return;
         if (!previousFrame) previousFrame = frameTime;
         const elapsed = Math.min((frameTime - previousFrame) / 1000, 0.05);
         previousFrame = frameTime;
@@ -487,6 +804,7 @@
         keys.delete(key);
       });
       window.addEventListener("blur", () => keys.clear());
+      document.getElementById("reset-level").addEventListener("click", resetLevel);
       render();
       requestAnimationFrame(update);
     })();

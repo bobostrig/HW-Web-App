@@ -113,3 +113,23 @@
 - **What you asked:** Ensure one beam spawns to the left of the player crane and two spawn to the right.
 - **What changed:** Made the initial beam spawn positions explicit in the game logic and added the one-left/two-right rule to the beam generation specification.
 - **Whether it worked:** The three spawn positions are set to one left and two right of the crane mast.
+## 28. Implement step 3: capacity and safe beam generation
+- **What you asked:** Move on to part 3 of the implementation plan.
+- **What changed:** Added continuous radius and capacity calculations, randomized beam weights and pickup positions that stay within route capacity, live radius/capacity outputs, a flashing warning at 90%, and a crane/tower collapse with level failure at 100%. Updated `spec.md` with the scene radius mapping and beam-weight generation range.
+- **Whether it worked:** The calculations, generation, warning, and overload behavior are implemented in `index.html`.
+## 29. Interpolate capacity continuously
+- **What you asked:** Replace the constant capacity within each chart section with a new capacity value as the trolley moves to each new position.
+- **What changed:** Replaced stepwise capacity lookup with linear interpolation between chart distances, kept 0–50 ft at 20,000 lb, displayed the changing maximum capacity in pounds alongside the percentage, and updated validation examples and the Outputs specification.
+- **Whether it worked:** Capacity is now calculated continuously from radius, and the changing pound limit is displayed.
+## 30. Guarantee a tip-over challenge beam per level
+- **What you asked:** Ensure every level has at least one beam that will make the crane tip over if carried far enough along the boom.
+- **What changed:** Made the third, right-side beam a challenge load whose weight exceeds capacity at 150 ft while remaining below capacity along its generated route to the target. Documented the weight rule and validation example in `spec.md`.
+- **Whether it worked:** The generator now selects a challenge weight for every level from the safe route-capacity range above the 150 ft capacity.
+## 31. Add a reset button and crumbling failure sequence
+- **What you asked:** Add a reset button to the level-failed screen and make the crane and tower fall down and crumble into pieces.
+- **What changed:** Added a Restart Level button that resets the crane, targets, beams, and controls; animated the player crane and tower falling, generated falling steel debris, and showed the failure panel after the collapse. Updated the failure behavior in `spec.md`.
+- **Whether it worked:** The failure sequence and restart behavior are implemented in `index.html`.
+## 32. Make structural members detach individually
+- **What you asked:** Replace the generic crumble effect with crane parts detaching and tower beams detaching and falling.
+- **What changed:** Replaced random rubble fragments with separate falling crane boom, mast, trolley, counterweight, tower column, crossbeam, and brace members. Updated the failure description in `spec.md`.
+- **Whether it worked:** The collapse sequence now animates separate structural members falling.

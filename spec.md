@@ -7,29 +7,31 @@ Use either the arrow keys or WASD. Left and right move the trolley along the pla
 
 ### Crane capacity by load radius
 
-Measure load radius horizontally from the crane�s center of rotation to the beam. Let `r` be the radius in feet, and let `C(r)` be the maximum permitted beam weight in pounds.
+Measure the horizontal distance from the crane's center of rotation to the beam. Let `r` be the radius in feet and `C(r)` the maximum permitted beam weight in pounds. In the game scene, 500 horizontal scene units represent the full 150 ft boom reach: `r = min(150, |x - x_mast| * 150 / 500)`.
 
 | Load radius | Maximum beam weight |
 |---:|---:|
-| 0�50 ft | 20,000 lb |
-| Over 50�75 ft | 13,000 lb |
-| Over 75�100 ft | 9,000 lb |
-| Over 100�125 ft | 7,000 lb |
-| Over 125�150 ft | 5,500 lb |
+| 0–50 ft | 20,000 lb |
+| 50 ft | 20,000 lb |
+| 75 ft | 13,000 lb |
+| 100 ft | 9,000 lb |
+| 125 ft | 7,000 lb |
+| 150 ft | 5,500 lb |
 
-Use the next larger listed distance�s capacity for radii between chart values. For example, `C(112) = 7,000 lb`.
+Capacity is constant at 20,000 lb from 0 through 50 ft. Between each pair of chart distances, calculate capacity with linear interpolation:
 
 ```text
-C(r) =
-  20,000 lb, if 0 <= r <= 50
-  13,000 lb, if 50 < r <= 75
-   9,000 lb, if 75 < r <= 100
-   7,000 lb, if 100 < r <= 125
-   5,500 lb, if 125 < r <= 150
+C(r) = C1 + ((r - r1) / (r2 - r1)) * (C2 - C1)
 ```
 
-Update the radius and capacity continuously as the trolley moves. Only the beam�s weight counts; the cable�s weight is excluded.
+Here `(r1, C1)` and `(r2, C2)` are the chart points immediately below and above the current radius. For example, at 112 ft:
 
+```text
+C(112) = 9,000 + ((112 - 100) / (125 - 100)) * (7,000 - 9,000)
+       = 8,040 lb
+```
+
+Update radius and capacity continuously as the trolley moves. Display the interpolated maximum capacity in pounds and the beam's capacity percentage. Only the beam's weight counts; the cable's weight is excluded.
 ### Capacity percentage and warning
 
 Let `W` be the beam�s weight in pounds. Calculate the capacity percentage at the current radius as:
@@ -50,11 +52,11 @@ If the beam reaches or exceeds 100% capacity:
 P(r) >= 100%
 ```
 
-the crane falls over dramatically, crashes into the tower being built, and the tower collapses.
+the player crane falls into the unfinished tower, then its boom and mast sections detach. The tower's columns, crossbeams, and braces also detach and fall as separate steel members. After the collapse, show a Level Failed screen with a Restart Level button that resets the current level.
 
 ### Beam generation and route feasibility
 
-At the start of each level, generate three beams, each with a weight `W_i`, a pickup radius `r_p,i`, and a target radius `r_t,i`, where `i` is 1, 2, or 3. Spawn one beam on the left side of the player crane mast and the other two on the right side.
+At the start of each level, generate three beams, each with a weight `W_i`, a pickup radius `r_p,i`, and a target radius `r_t,i`, where `i` is 1, 2, or 3. Spawn one beam on the left side of the player crane mast and the other two on the right. Keep the challenge beam on the right so the player can carry it to the full 150 ft radius. Randomize pickup positions within the left and right boom areas while keeping all three positions reachable.
 
 For each beam, check capacity at pickup and continuously along the trolley�s route to its target. Let `R_i` be the set of radii the beam passes through while being carried. The beam is feasible only if:
 
@@ -68,7 +70,7 @@ Equivalently:
 W_i < min(C(r) for r in R_i)
 ```
 
-Generate beam weights and locations so this condition holds for all three beams. This keeps each generated task below the 100% tip-over threshold.
+Generate the first two beam weights in 250 lb increments between 50% and a level-dependent upper fraction of their route capacity. Let `C_route,i = min(C(r) for r in R_i)` and `f_max(level) = min(0.94, 0.82 + 0.03 * (level - 1))`; choose each ordinary beam weight so `0.50 * C_route,i <= W_i <= f_max(level) * C_route,i`. The third, right-side beam is the challenge beam. Choose its weight in 250 lb increments so `C(150) < W_risk <= f_max(level) * C_route,risk`. This guarantees that every level has a beam that is safe along its generated pickup-to-target route but exceeds crane capacity if carried to a sufficiently far radius. Generate all beam weights and locations so every pickup-to-target route remains below the 100% tip-over threshold.
 ## Outputs
 
 Display these outputs in boxes that remain visible at the top of the screen during play:
@@ -78,7 +80,7 @@ Display these outputs in boxes that remain visible at the top of the screen duri
 - **High score:** Highest score achieved.
 - **Level:** Current level out of five.
 - **Radius:** Current load radius in feet.
-- **Capacity:** Current beam’s weight as a percentage of the crane’s capacity at that radius.
+- **Capacity:** Show the carried beam's weight as a percentage of the crane's interpolated capacity, along with the current maximum capacity in pounds.
 - **Beam weights:** Show each beam’s weight on or next to that individual beam.
 ## Look and feel
 
@@ -94,11 +96,13 @@ Show black 2D birds flying in the sky. When a bird hits the cable, make the cabl
 
 When capacity reaches 90%, make the capacity percentage box at the top of the screen flash red.
 ## Validation
-74.99 ft: the next radius ≥ 74.99 is 75, so the capacity is 13,000 and 0.9 × 13,000 = 11,700.
-75.01 ft: 75 < 75.01, so the next row is 100 ft, giving 9,000 and 0.9 × 9,000 = 8,100.
-112 ft: the next row is 125 ft, giving 7,000 and 0.9 × 7,000 = 6,300.
-Interpolation at 112 ft: 9,000 + (12/25) × (7,000 − 9,000) = 9,000 − 960 = 8,040.
 
+- 50 ft: capacity is 20,000 lb.
+- 62.5 ft: halfway between 50 ft (20,000 lb) and 75 ft (13,000 lb), so capacity is 16,500 lb.
+- 74.99 ft: interpolate between 50 ft and 75 ft, giving approximately 13,003 lb.
+- 75.01 ft: interpolate between 75 ft and 100 ft, giving approximately 12,998 lb.
+- 112 ft: interpolate between 100 ft and 125 ft, giving 8,040 lb; the 90% warning threshold is 7,236 lb.
+- 150 ft: capacity is 5,500 lb. A 5,750 lb challenge beam exceeds capacity at 150 ft, but remains below the approximately 7,160 lb route capacity at a 123 ft target radius.
 ## Out of scope
 
 - This is a simple game for fun, not a real crane simulator, operator training tool, or source of real-world safety guidance.
