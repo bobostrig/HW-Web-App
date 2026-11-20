@@ -111,6 +111,35 @@
       text-align: center;
     }
 
+    .start-panel {
+      position: absolute;
+      z-index: 5;
+      inset: 0;
+      display: grid;
+      place-content: center;
+      justify-items: center;
+      gap: 10px;
+      padding: 24px;
+      background: rgb(7 17 25 / 76%);
+      text-align: center;
+    }
+    .start-panel h2 { margin: 0; color: #fff6e7; font-size: clamp(25px, 4vw, 44px); letter-spacing: -.04em; }
+    .start-panel p { max-width: 430px; margin: 0; color: #d2dfe4; font-size: 14px; line-height: 1.5; }
+    .start-button {
+      margin-top: 7px;
+      padding: 12px 25px;
+      border: 0;
+      border-radius: 8px;
+      background: #f1bd68;
+      color: #19252c;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .start-button:hover { background: #ffd389; }
+    .start-button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
     .fail-panel strong { display: block; color: #ff8980; font-size: 13px; letter-spacing: .15em; text-transform: uppercase; }
     .reset-button {
       margin-top: 11px;
@@ -175,13 +204,13 @@
 
     <section class="game-frame" aria-label="Tower crane construction site">
       <section class="hud" aria-label="Game status">
-        <div class="hud-card timer"><span class="hud-label">Time left</span><span class="hud-value">03:00</span></div>
-        <div class="hud-card"><span class="hud-label">Score</span><span class="hud-value">0</span></div>
+        <div class="hud-card timer"><span class="hud-label">Time left</span><span class="hud-value" id="timer-value">03:00</span></div>
+        <div class="hud-card"><span class="hud-label">Score</span><span class="hud-value" id="score-value">0</span></div>
         <div class="hud-card"><span class="hud-label">High score</span><span class="hud-value">0</span></div>
-        <div class="hud-card"><span class="hud-label">Level</span><span class="hud-value">1 <small>/ 5</small></span></div>
+        <div class="hud-card"><span class="hud-label">Level</span><span class="hud-value"><span id="level-value">1</span> <small>/ 5</small></span></div>
         <div class="hud-card"><span class="hud-label">Radius</span><span class="hud-value"><span id="radius-value">42</span> <small>ft</small></span></div>
         <div class="hud-card capacity" id="capacity-card"><span class="hud-label">Capacity</span><span class="hud-value"><span id="capacity-value">0</span><small>% · <span id="max-capacity-value">20,000 lb</span> max</small></span></div>
-        <div class="hud-card beams"><span class="hud-label">Steel pieces</span><span class="hud-value">3 <small>to place</small></span></div>
+        <div class="hud-card beams"><span class="hud-label">Steel pieces</span><span class="hud-value"><span id="remaining-beams">3</span> <small>to place</small></span></div>
       </section>
       <svg class="scene" viewBox="0 0 1440 660" role="img" aria-labelledby="scene-title scene-desc" xmlns="http://www.w3.org/2000/svg">
         <title id="scene-title">Tower crane construction site</title>
@@ -330,16 +359,21 @@
 
         <g id="crash-overlay" display="none" text-anchor="middle">
           <rect width="1440" height="660" fill="#08131d" opacity=".58"/>
-          <text x="720" y="286" fill="#ff766d" font-size="20" font-weight="900" letter-spacing="5">LOAD LIMIT EXCEEDED</text>
-          <text x="720" y="338" fill="#fff6e7" font-size="42" font-weight="900" letter-spacing="3">LEVEL FAILED</text>
+          <text id="failure-cause" x="720" y="286" fill="#ff766d" font-size="20" font-weight="900" letter-spacing="5">LOAD LIMIT EXCEEDED</text>
+          <text id="failure-title" x="720" y="338" fill="#fff6e7" font-size="42" font-weight="900" letter-spacing="3">LEVEL FAILED</text>
         </g>
         <g id="debris" display="none" aria-hidden="true"></g>
 
         <path d="M0 510h1440" stroke="#f2dbab" stroke-opacity=".16" stroke-width="1"/>
       </svg>
       <div class="fail-panel" id="fail-panel" role="group" aria-label="Level failed">
-        <strong>Level failed</strong>
+        <strong id="result-title">Level failed</strong>
         <button class="reset-button" id="reset-level" type="button">Restart level</button>
+      </div>
+      <div class="start-panel" id="start-panel" role="dialog" aria-labelledby="start-title" aria-describedby="start-description">
+        <h2 id="start-title">High Steel</h2>
+        <p id="start-description">Place three steel beams in each level. Every level brings heavier loads. Keep each lift within the crane’s capacity.</p>
+        <button class="start-button" id="start-game" type="button">Start game</button>
       </div>
     </section>
 
@@ -366,12 +400,31 @@
       const crashOverlay = document.getElementById("crash-overlay");
       const debrisGroup = document.getElementById("debris");
       const failPanel = document.getElementById("fail-panel");
+      const startPanel = document.getElementById("start-panel");
+      const startButton = document.getElementById("start-game");
+      const failureCause = document.getElementById("failure-cause");
+      const failureTitle = document.getElementById("failure-title");
+      const resultTitle = document.getElementById("result-title");
+      const resetButton = document.getElementById("reset-level");
+      const timerValue = document.getElementById("timer-value");
+      const scoreValue = document.getElementById("score-value");
+      const levelValue = document.getElementById("level-value");
+      const remainingBeamsValue = document.getElementById("remaining-beams");
       const targetElements = [1, 2, 3].map((number) => document.getElementById(`target-${number}`));
       const targetYs = [410.5, 328.5, 274.5].map((y) => 510 + 1.5 * (y - 510));
-      const beamSpawnRanges = [[235, 285], [360, 470], [520, 660]];
+      const beamSpawnRanges = [[155, 205], [360, 470], [520, 660]];
       const mastPivot = 310;
       let currentLevel = 1;
+      let score = 0;
+      let remainingSeconds = 120;
+      let levelTransition = false;
+      let finishedGame = false;
+      let failureRestartsGame = false;
       const targetX = 720;
+
+      function levelTimeLimit(level) {
+        return [120, 90, 60, 45, 30][level - 1] ?? 30;
+      }
 
       function capacityAtRadius(radius) {
         const chart = [
@@ -403,21 +456,13 @@
         return capacityAtRadius(farthestRadius);
       }
 
-      function generateBeamWeight(startX, endX, level) {
-        const routeLimit = routeCapacity(startX, endX);
-        const maximum = Math.floor((routeLimit * Math.min(.94, .82 + (level - 1) * .03)) / 250) * 250;
-        const minimum = Math.floor((routeLimit * .5) / 250) * 250;
-        const increments = Math.max(1, Math.floor((maximum - minimum) / 250) + 1);
-        return minimum + Math.floor(Math.random() * increments) * 250;
+      function generateBeamWeight(beamId, level) {
+        const baseWeight = beamId === 1 ? 3250 : 4250;
+        return baseWeight + (level - 1) * 500 + Math.floor(Math.random() * 2) * 250;
       }
 
       function generateTipRiskWeight(startX, endX, level) {
-        const routeLimit = routeCapacity(startX, endX);
-        const minimum = capacityAtRadius(150) + 250;
-        const maximum = Math.floor((routeLimit * Math.min(.94, .82 + (level - 1) * .03)) / 250) * 250;
-        if (maximum < minimum) return generateBeamWeight(startX, endX, level);
-        const increments = Math.floor((maximum - minimum) / 250) + 1;
-        return minimum + Math.floor(Math.random() * increments) * 250;
+        return capacityAtRadius(150) + 250 + (level - 1) * 250;
       }
 
       const beams = [
@@ -446,7 +491,7 @@
       let carriedBeam = null;
       let activeTargets = [];
       const filledTargets = new Set();
-      let gameOver = false;
+      let gameOver = true;
       let previousFrame = 0;
 
       function spawnLevelBeams(level) {
@@ -458,7 +503,7 @@
           beam.x = minimumX + Math.floor(Math.random() * (steps + 1)) * 5;
           beam.weight = beam.id === 3
             ? generateTipRiskWeight(beam.x, targetX, level)
-            : generateBeamWeight(beam.x, targetX, level);
+            : generateBeamWeight(beam.id, level);
           beam.state = "ground";
           beam.element.setAttribute("transform", `translate(${beam.x} 0)`);
           beam.stand.setAttribute("visibility", "visible");
@@ -467,6 +512,89 @@
         });
       }
       spawnLevelBeams(currentLevel);
+
+      function updateProgressHud() {
+        const totalSeconds = Math.ceil(remainingSeconds);
+        timerValue.textContent = `${String(Math.floor(totalSeconds / 60)).padStart(2, "0")}:${String(totalSeconds % 60).padStart(2, "0")}`;
+        scoreValue.textContent = score.toLocaleString();
+        levelValue.textContent = String(currentLevel);
+        remainingBeamsValue.textContent = String(beams.filter((beam) => beam.state !== "placed").length);
+      }
+
+      function failByTimeout() {
+        startCollapse("TIME EXPIRED");
+      }
+
+      function completeLevel() {
+        if (levelTransition || gameOver) return;
+        levelTransition = true;
+        gameOver = true;
+        keys.clear();
+        score += 200;
+        updateProgressHud();
+        if (currentLevel === 5) {
+          gameOver = true;
+          levelTransition = false;
+          finishedGame = true;
+          failureCause.textContent = "CONSTRUCTION FINISHED";
+          failureTitle.textContent = "GAME COMPLETE";
+          resultTitle.textContent = `Final score: ${score.toLocaleString()}`;
+          resetButton.textContent = "Play again";
+          crashOverlay.setAttribute("display", "inline");
+          failPanel.style.display = "block";
+          setStatus("All five levels complete. Well done!");
+          return;
+        }
+        setStatus(`Level ${currentLevel} complete. Preparing level ${currentLevel + 1}...`);
+        window.setTimeout(() => {
+          currentLevel += 1;
+          beginLevel(`Level ${currentLevel} started. Place all three beams before time runs out.`);
+        }, 900);
+      }
+
+      function beginLevel(message) {
+        gameOver = false;
+        levelTransition = false;
+        finishedGame = false;
+        failureRestartsGame = false;
+        turning = false;
+        turnFrom = 1;
+        turnTo = 1;
+        turnStartedAt = 0;
+        craneOrientation = 1;
+        visualScaleX = 1;
+        trolleyX = trolleyHome;
+        hookY = 333;
+        carriedBeam = null;
+        activeTargets = [];
+        keys.clear();
+        previousFrame = 0;
+        remainingSeconds = levelTimeLimit(currentLevel);
+        filledTargets.clear();
+        targetElements.forEach((target) => {
+          target.setAttribute("stroke", "#77d9df");
+          target.setAttribute("stroke-width", "3");
+          target.setAttribute("stroke-dasharray", "7 6");
+        });
+        playerCrane.removeAttribute("opacity");
+        towerCollapse.removeAttribute("opacity");
+        document.getElementById("tower-worker").removeAttribute("opacity");
+        towerCollapse.removeAttribute("transform");
+        crashOverlay.setAttribute("display", "none");
+        failPanel.style.display = "none";
+        debrisGroup.replaceChildren();
+        debrisGroup.setAttribute("display", "none");
+        capacityCard.classList.remove("warning");
+        failureCause.textContent = "LOAD LIMIT EXCEEDED";
+        failureTitle.textContent = "LEVEL FAILED";
+        resultTitle.textContent = "Level failed";
+        resetButton.textContent = "Restart level";
+        spawnLevelBeams(currentLevel);
+        updateProgressHud();
+        setStatus(message);
+        render();
+        requestAnimationFrame(update);
+      }
 
       function hookScreenY() {
         return 510 + 1.3 * (hookY - 510);
@@ -580,15 +708,33 @@
         return pieces;
       }
 
-      function startCollapse() {
+      function createFallingWorker() {
+        const worker = document.getElementById("tower-worker").cloneNode(true);
+        worker.removeAttribute("id");
+        worker.setAttribute("transform", "translate(746 324)");
+        worker.setAttribute("opacity", "1");
+        debrisGroup.appendChild(worker);
+        return worker;
+      }
+
+      function startCollapse(cause = "LOAD LIMIT EXCEEDED") {
         if (gameOver) return;
         gameOver = true;
         turning = false;
         keys.clear();
-        setStatus("Load limit exceeded. The crane and tower are collapsing.");
+        levelTransition = false;
+        failureCause.textContent = cause;
+        failureTitle.textContent = "LEVEL FAILED";
+        resultTitle.textContent = `Level ${currentLevel} failed`;
+        failureRestartsGame = cause === "TIME EXPIRED";
+        resetButton.textContent = failureRestartsGame ? "Restart game" : "Restart level";
+        setStatus(cause === "TIME EXPIRED"
+          ? "Time expired. The crane and tower are collapsing."
+          : "Load limit exceeded. The crane and tower are collapsing.");
         const startedAt = performance.now();
         const scaleX = visualScaleX;
         const debris = createBreakawayPieces();
+        const fallingWorker = createFallingWorker();
         debrisGroup.setAttribute("display", "inline");
         function fall(frameTime) {
           const elapsed = (frameTime - startedAt) / 1000;
@@ -607,6 +753,31 @@
             item.element.setAttribute("transform", `translate(${x - item.x} ${y - item.y}) rotate(${angle} ${item.x} ${item.y})`);
             item.element.setAttribute("opacity", String(eased));
           });
+          const workerElapsed = Math.max(0, elapsed - 0.12);
+          let workerY;
+          let workerAngle;
+          if (workerElapsed < 0.72) {
+            const fallProgress = workerElapsed / 0.72;
+            workerY = 324 + 141 * fallProgress * fallProgress;
+            workerAngle = 175 * fallProgress;
+          } else if (workerElapsed < 0.96) {
+            const bounceProgress = (workerElapsed - 0.72) / 0.24;
+            workerY = 465 - 42 * Math.sin(Math.PI * bounceProgress);
+            workerAngle = 175 - 80 * bounceProgress;
+          } else if (workerElapsed < 1.18) {
+            const bounceProgress = (workerElapsed - 0.96) / 0.22;
+            workerY = 465 - 18 * Math.sin(Math.PI * bounceProgress);
+            workerAngle = 95 - 5 * bounceProgress;
+          } else if (workerElapsed < 1.34) {
+            const bounceProgress = (workerElapsed - 1.18) / 0.16;
+            workerY = 465 - 7 * Math.sin(Math.PI * bounceProgress);
+            workerAngle = 90;
+          } else {
+            workerY = 465;
+            workerAngle = 90;
+          }
+          const workerX = 746 + Math.min(workerElapsed / 0.72, 1) * 34;
+          fallingWorker.setAttribute("transform", `translate(${workerX} ${workerY}) rotate(${workerAngle})`);
           if (elapsed < 1.9) requestAnimationFrame(fall);
           else {
             playerCrane.setAttribute("opacity", "0");
@@ -614,45 +785,22 @@
             document.getElementById("tower-worker").setAttribute("opacity", "0");
             crashOverlay.setAttribute("display", "inline");
             failPanel.style.display = "block";
-            setStatus("Level failed: crane exceeded its load capacity.");
+            setStatus(cause === "TIME EXPIRED"
+              ? "Level failed: time expired. Restart the level to try again."
+              : "Level failed: crane exceeded its load capacity.");
           }
         }
         requestAnimationFrame(fall);
       }
 
       function resetLevel() {
-        gameOver = false;
-        turning = false;
-        turnFrom = 1;
-        turnTo = 1;
-        turnStartedAt = 0;
-        craneOrientation = 1;
-        visualScaleX = 1;
-        trolleyX = trolleyHome;
-        hookY = 333;
-        carriedBeam = null;
-        activeTargets = [];
-        keys.clear();
-        previousFrame = 0;
-        filledTargets.clear();
-        targetElements.forEach((target) => {
-          target.setAttribute("stroke", "#77d9df");
-          target.setAttribute("stroke-width", "3");
-          target.setAttribute("stroke-dasharray", "7 6");
-        });
-        playerCrane.removeAttribute("opacity");
-        towerCollapse.removeAttribute("opacity");
-        document.getElementById("tower-worker").removeAttribute("opacity");
-        towerCollapse.removeAttribute("transform");
-        crashOverlay.setAttribute("display", "none");
-        failPanel.style.display = "none";
-        debrisGroup.replaceChildren();
-        debrisGroup.setAttribute("display", "none");
-        capacityCard.classList.remove("warning");
-        spawnLevelBeams(currentLevel);
-        setStatus(`Level ${currentLevel} restarted. Move the trolley and hook, then press Space to pick up a beam.`);
-        render();
-        requestAnimationFrame(update);
+        beginLevel(`Level ${currentLevel} restarted. Move the trolley and hook, then press Space to pick up a beam.`);
+      }
+
+      function restartGame() {
+        currentLevel = 1;
+        score = 0;
+        beginLevel("Game restarted. Place all three beams before time runs out.");
       }
 
       function updateCapacity() {
@@ -716,6 +864,8 @@
             carriedBeam.state = "placed";
             carriedBeam.stand.setAttribute("visibility", "hidden");
             filledTargets.add(targetIndex);
+            score += 100;
+            updateProgressHud();
             setStatus(`Beam ${carriedBeam.id} placed in target ${targetIndex + 1}.`);
           } else {
             carriedBeam.x = trolleyScreenX();
@@ -726,6 +876,7 @@
           }
           carriedBeam = null;
           render();
+          if (filledTargets.size === 3) completeLevel();
           return;
         }
 
@@ -749,9 +900,20 @@
 
       function update(frameTime) {
         if (gameOver) return;
-        if (!previousFrame) previousFrame = frameTime;
-        const elapsed = Math.min((frameTime - previousFrame) / 1000, 0.05);
+        const frameDelta = previousFrame ? Math.max(0, (frameTime - previousFrame) / 1000) : 0;
+        const elapsed = Math.min(frameDelta, 0.05);
         previousFrame = frameTime;
+        if (!levelTransition) {
+          remainingSeconds = Math.max(0, remainingSeconds - frameDelta);
+          updateProgressHud();
+          if (remainingSeconds <= 0) {
+            failByTimeout();
+            return;
+          }
+        } else {
+          requestAnimationFrame(update);
+          return;
+        }
         let changed = false;
         const horizontal = keys.has("ArrowLeft") || keys.has("a") ? -1 : keys.has("ArrowRight") || keys.has("d") ? 1 : 0;
         const vertical = keys.has("ArrowUp") || keys.has("w") ? -1 : keys.has("ArrowDown") || keys.has("s") ? 1 : 0;
@@ -804,9 +966,13 @@
         keys.delete(key);
       });
       window.addEventListener("blur", () => keys.clear());
-      document.getElementById("reset-level").addEventListener("click", resetLevel);
+      resetButton.addEventListener("click", () => finishedGame || failureRestartsGame ? restartGame() : resetLevel());
+      startButton.addEventListener("click", () => {
+        startPanel.style.display = "none";
+        beginLevel("Level 1 started. Place all three beams before time runs out.");
+      });
+      updateProgressHud();
       render();
-      requestAnimationFrame(update);
     })();
   </script>
 </body>

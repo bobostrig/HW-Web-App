@@ -133,3 +133,27 @@
 - **What you asked:** Replace the generic crumble effect with crane parts detaching and tower beams detaching and falling.
 - **What changed:** Replaced random rubble fragments with separate falling crane boom, mast, trolley, counterweight, tower column, crossbeam, and brace members. Updated the failure description in `spec.md`.
 - **Whether it worked:** The collapse sequence now animates separate structural members falling.
+## 33. Implement step 4: timed levels, scoring, and progression
+- **What you asked:** Move to part 4 of the implementation plan.
+- **What changed:** Added a three-minute countdown per level, live score and beam-count displays, 100 points per placed beam, a 200-point level-completion bonus, automatic progression through five levels, timeout failure, and a game-complete screen. Updated `spec.md` with the scoring and progression rules.
+- **Whether it worked:** The app now tracks level timing, placements, score, and progression.
+## 34. Add a start screen and progressive beam weights
+- **What you asked:** Add a click-to-start screen, make each level's beams heavier than the previous level, and move the beam left of the tower farther left.
+- **What changed:** Added a start overlay with a Start Game button; the level timer and game loop now begin only after the click. Set each beam's level-to-level weight increase so every corresponding beam gets heavier, moved the left spawn range farther left, and updated the specification.
+- **Whether it worked:** Implemented in `index.html`; the start screen gates gameplay, weights increase at each level, and the left beam spawns farther from the tower.
+## 35. Decrease the time limit by level
+- **What you asked:** Start level 1 with three minutes and decrease the time limit by 30 seconds for each following level.
+- **What changed:** Made the level timer calculate from the current level, producing limits of 3:00, 2:30, 2:00, 1:30, and 1:00. Updated the purpose, timer output, progression rules, and implementation plan in `spec.md`.
+- **Whether it worked:** The timer resets to the correct shorter limit whenever a new level begins.
+## 36. Set the five level time limits
+- **What you asked:** Set the time limits to 2 minutes, 1 minute 30 seconds, 1 minute, 45 seconds, and 30 seconds across the five levels.
+- **What changed:** Replaced the timer formula with the five requested per-level limits and updated the timer descriptions and progression rules in `spec.md`.
+- **Whether it worked:** The level timer now selects 120, 90, 60, 45, or 30 seconds by level.
+## 37. Animate timeout and worker failure scenes
+- **What you asked:** Make timeout trigger the crane's dramatic fall, and make the red worker fall from the tower and bounce on the ground for both overload and timeout failures.
+- **What changed:** Routed timer expiration through the existing crane and tower collapse animation. Added a worker fall with several diminishing ground bounces for either failure cause, and documented both scenes in `spec.md`.
+- **Whether it worked:** Both timeout and overload now use the shared collapse flow and worker animation before showing the restart screen.
+## 38. Restart the full game after a timeout
+- **What you asked:** Make the timeout screen's restart button restart the entire game and reset the score, rather than restarting only the current level.
+- **What changed:** Timeout now shows a Restart Game button that returns to level 1 and clears the score. Overload failure continues to offer Restart Level. Updated `spec.md` to describe the separate restart behavior.
+- **Whether it worked:** The timeout button now invokes the full-game restart path.
