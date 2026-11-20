@@ -107,8 +107,6 @@ Interpolation at 112 ft: 9,000 + (12/25) × (7,000 − 9,000) = 9,000 − 960 = 
 - The game includes five levels; extra game modes and a level editor are not included.
 - No accounts or online features; the high score is saved locally in the player's browser.
 ## Features
-1. There will be a guy walking on the uncompleted tower in red that you can't hit
-2. There will be birds flying in the sky that when they hit the cable holding the load it sways a lot
 
-
-
+1. **Worker hazard:** A worker wearing red clothing, a hardhat, and carrying a hammer walks on the unfinished tower. The player must avoid hitting him with a beam. If a beam hits the worker, show him falling and immediately fail the level.
+2. **Birds and load sway:** Black 2D birds occasionally fly across the sky and may hit the load cable. When a bird hits, the cable buckles and the beam swings wildly. The player cannot control or steady the load; it settles on its own.

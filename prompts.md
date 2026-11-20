@@ -37,3 +37,7 @@
 - **What you asked:** Replace Out of scope with the revised proposal, excluding the worker detail and using the shortened accounts and online features line.
 - **What changed:** Updated the Out of scope section in `spec.md` with the approved wording.
 - **Whether it worked:** Yes. The revised section is in place.
+## 9. Update the Features section
+- **What you asked:** Replace Features with the approved worker hazard and bird-induced wild load sway descriptions.
+- **What changed:** Replaced the Features section in `spec.md` with the reviewed wording.
+- **Whether it worked:** Yes. The updated Features section is in place.
