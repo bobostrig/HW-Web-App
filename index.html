@@ -206,9 +206,9 @@
           <path d="M625 458 815 376M815 458 625 376M625 376 815 294M815 376 625 294" fill="none" stroke="#c8b17f" stroke-opacity=".76" stroke-width="3"/>
         </g>
         <g transform="translate(0 510) scale(1 1.5) translate(0 -510)" fill="none" stroke="#77d9df" stroke-width="3" stroke-dasharray="7 6" opacity=".9">
-          <rect x="648" y="397" width="144" height="27" rx="3"/>
-          <rect x="648" y="315" width="144" height="27" rx="3"/>
-          <rect x="648" y="267" width="144" height="15" rx="3"/>
+          <rect id="target-1" x="648" y="397" width="144" height="27" rx="3"/>
+          <rect id="target-2" x="648" y="315" width="144" height="27" rx="3"/>
+          <rect id="target-3" x="648" y="267" width="144" height="15" rx="3"/>
         </g>
         <g transform="translate(0 510) scale(1 1.5) translate(0 -510)" fill="#d5f7f4" font-size="10" font-weight="800" letter-spacing="1.5" text-anchor="middle">
           <text x="720" y="416">TARGET 01</text><text x="720" y="334">TARGET 02</text><text x="720" y="279">TARGET 03</text>
@@ -216,7 +216,7 @@
         <path d="M625 261V230m190 31v-31" transform="translate(0 510) scale(1 1.5) translate(0 -510)" stroke="#819196" stroke-width="8"/>
 
         <!-- Player crane on the left -->
-        <g transform="translate(0 510) scale(1 1.3) translate(0 -510)">
+        <g id="player-crane" transform="translate(0 510) scale(1 1.3) translate(0 -510)">
           <path d="M286 510V168M334 510V168" fill="none" stroke="#354951" stroke-width="9"/>
           <path d="M286 470h48m-48-48h48m-48-48h48m-48-48h48m-48-48h48m-48-48h48" fill="none" stroke="#8a9998" stroke-width="5"/>
           <path d="m286 470 48-48m-48 0 48 48m-48-96 48-48m-48 0 48 48m-48-96 48-48m-48 0 48 48" fill="none" stroke="#526870" stroke-width="3"/>
@@ -224,36 +224,41 @@
           <path d="M335 160h452" stroke="#785d37" stroke-opacity=".75" stroke-width="2"/>
           <path d="M190 130h39v45h-39z" fill="#66594a" stroke="#3c4140" stroke-width="4"/>
           <path d="M195 138h29v6h-29m0 10h29v6h-29m0 10h29v6h-29" stroke="#b49a6a" stroke-width="2"/>
-          <path d="M507 147h42v28h-42z" fill="#efbd66" stroke="#725834" stroke-width="4"/>
-          <path d="M511 153h34v5h-34z" fill="#ffe1a0" opacity=".7"/>
-          <circle cx="515" cy="177" r="5" fill="#705c3b"/><circle cx="541" cy="177" r="5" fill="#705c3b"/>
-          <path d="M528 175v158" stroke="#273943" stroke-width="3"/>
-          <path d="M519 332h18l-2 18h-14z" fill="#a8b2ae" stroke="#394951" stroke-width="3"/>
-          <path d="M515 352h25l-4 12h-18z" fill="#56686e"/>
-          <circle cx="528" cy="168" r="5" fill="#ffdf91"/>
+          <g id="player-trolley">
+            <path d="M507 147h42v28h-42z" fill="#efbd66" stroke="#725834" stroke-width="4"/>
+            <path d="M511 153h34v5h-34z" fill="#ffe1a0" opacity=".7"/>
+            <circle cx="515" cy="177" r="5" fill="#705c3b"/><circle cx="541" cy="177" r="5" fill="#705c3b"/>
+            <path id="hoist-line" d="M528 175v158" stroke="#273943" stroke-width="3"/>
+            <g id="hook" transform="translate(0 0)">
+              <path d="M519 332h18l-2 18h-14z" fill="#a8b2ae" stroke="#394951" stroke-width="3"/>
+              <path d="M515 352h25l-4 12h-18z" fill="#56686e"/>
+            </g>
+            <circle cx="528" cy="168" r="5" fill="#ffdf91"/>
+          </g>
         </g>
 
-        <!-- Load pickup pieces -->
-        <g>
-          <path d="M179 499v-18m-12 18h24" stroke="#293b43" stroke-width="3"/>
-          <rect x="147" y="465" width="65" height="13" rx="2" fill="#9ba8a7" stroke="#33464e" stroke-width="3"/>
-          <path d="M158 465v13m43-13v13" stroke="#4c616a" stroke-width="3"/>
-          <rect x="137" y="440" width="84" height="23" rx="11" fill="#14252e" stroke="#61747a"/>
-          <text x="179" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">8,000 lb</text>
-
-          <path d="M437 499v-18m-12 18h24" stroke="#293b43" stroke-width="3"/>
-          <rect x="405" y="465" width="65" height="13" rx="2" fill="#879797" stroke="#33464e" stroke-width="3"/>
-          <path d="M416 465v13m43-13v13" stroke="#4c616a" stroke-width="3"/>
-          <rect x="395" y="440" width="84" height="23" rx="11" fill="#14252e" stroke="#61747a"/>
-          <text x="437" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">6,500 lb</text>
-
-          <path d="M518 499v-18m-12 18h24" stroke="#293b43" stroke-width="3"/>
-          <rect x="486" y="465" width="65" height="13" rx="2" fill="#aab5b0" stroke="#33464e" stroke-width="3"/>
-          <path d="M497 465v13m43-13v13" stroke="#4c616a" stroke-width="3"/>
-          <rect x="476" y="440" width="84" height="23" rx="11" fill="#14252e" stroke="#61747a"/>
-          <text x="518" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">5,000 lb</text>
+        <!-- Pickup beams stay within the player crane's main boom reach -->
+        <g id="beam-1" transform="translate(270 0)">
+          <path class="beam-stand" d="M0 499v-18m-12 18h24" stroke="#293b43" stroke-width="3"/>
+          <rect x="-32" y="465" width="65" height="13" rx="2" fill="#9ba8a7" stroke="#33464e" stroke-width="3"/>
+          <path d="M-21 465v13m43-13v13" stroke="#4c616a" stroke-width="3"/>
+          <rect x="-42" y="440" width="84" height="23" rx="11" fill="#14252e" stroke="#61747a"/>
+          <text x="0" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">8,000 lb</text>
         </g>
-
+        <g id="beam-2" transform="translate(500 0)">
+          <path class="beam-stand" d="M0 499v-18m-12 18h24" stroke="#293b43" stroke-width="3"/>
+          <rect x="-32" y="465" width="65" height="13" rx="2" fill="#879797" stroke="#33464e" stroke-width="3"/>
+          <path d="M-21 465v13m43-13v13" stroke="#4c616a" stroke-width="3"/>
+          <rect x="-42" y="440" width="84" height="23" rx="11" fill="#14252e" stroke="#61747a"/>
+          <text x="0" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">6,500 lb</text>
+        </g>
+        <g id="beam-3" transform="translate(620 0)">
+          <path class="beam-stand" d="M0 499v-18m-12 18h24" stroke="#293b43" stroke-width="3"/>
+          <rect x="-32" y="465" width="65" height="13" rx="2" fill="#aab5b0" stroke="#33464e" stroke-width="3"/>
+          <path d="M-21 465v13m43-13v13" stroke="#4c616a" stroke-width="3"/>
+          <rect x="-42" y="440" width="84" height="23" rx="11" fill="#14252e" stroke="#61747a"/>
+          <text x="0" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">5,000 lb</text>
+        </g>
         <!-- Worker on a tower beam -->
         <g transform="translate(0 510) scale(1 1.5) translate(0 -510) translate(746 335) scale(1 .9)" stroke-linecap="round" stroke-linejoin="round">
           <path d="M-6 27v18m8-18 9 17" stroke="#35444a" stroke-width="5"/>
@@ -297,8 +302,188 @@
         <span class="beam-chip">Beam 2 <strong>6,500 lb</strong></span>
         <span class="beam-chip">Beam 3 <strong>5,000 lb</strong></span>
       </div>
-      <div class="status"><span class="status-dot" aria-hidden="true"></span>Scene preview · crane controls coming next</div>
+      <div class="status"><span class="status-dot" aria-hidden="true"></span><span id="game-status" aria-live="polite">Arrows / WASD move trolley and hook · Space picks up or releases</span></div>
     </footer>
   </main>
+  <script>
+    (() => {
+      const craneTrolley = document.getElementById("player-trolley");
+      const hoistLine = document.getElementById("hoist-line");
+      const hook = document.getElementById("hook");
+      const status = document.getElementById("game-status");
+      const targetElements = [1, 2, 3].map((number) => document.getElementById(`target-${number}`));
+      const targetYs = [410.5, 328.5, 274.5].map((y) => 510 + 1.5 * (y - 510));
+      const beams = [
+        { id: 1, x: 270, weight: 8000, element: document.getElementById("beam-1") },
+        { id: 2, x: 500, weight: 6500, element: document.getElementById("beam-2") },
+        { id: 3, x: 620, weight: 5000, element: document.getElementById("beam-3") }
+      ].map((beam) => ({ ...beam, state: "ground", stand: beam.element.querySelector(".beam-stand") }));
+      const keys = new Set();
+      const trolleyHome = 528;
+      const mastPivot = 310;
+      let trolleyX = trolleyHome;
+      let hookY = 333;
+      let craneOrientation = 1;
+      let visualScaleX = 1;
+      let turning = false;
+      let turnFrom = 1;
+      let turnTo = 1;
+      let turnStartedAt = 0;
+      const turnDuration = 1600;
+      let carriedBeam = null;
+      let activeTargets = [];
+      const filledTargets = new Set();
+      let previousFrame = 0;
+
+      function hookScreenY() {
+        return 510 + 1.3 * (hookY - 510);
+      }
+
+      function trolleyScreenX() {
+        return mastPivot + (trolleyX - mastPivot) * visualScaleX;
+      }
+
+      function setStatus(message) {
+        status.textContent = message;
+      }
+
+      function updateTargetHighlight() {
+        activeTargets = [];
+        targetElements.forEach((target, index) => {
+          const beamOverTarget = carriedBeam && !filledTargets.has(index)
+            && Math.abs(hookScreenY() + 6.5 - targetYs[index]) < 18
+            && trolleyScreenX() >= 648 && trolleyScreenX() <= 792;
+          if (filledTargets.has(index)) {
+            target.setAttribute("stroke", "#79d7ac");
+            target.setAttribute("stroke-width", "4");
+            target.setAttribute("stroke-dasharray", "none");
+          } else {
+            target.setAttribute("stroke", beamOverTarget ? "#ffe19b" : "#77d9df");
+            target.setAttribute("stroke-width", beamOverTarget ? "5" : "3");
+            target.setAttribute("stroke-dasharray", beamOverTarget ? "none" : "7 6");
+          }
+          if (beamOverTarget) activeTargets.push(index);
+        });
+      }
+
+      function render() {
+        const playerCrane = document.getElementById("player-crane");
+        if (!turning) visualScaleX = craneOrientation;
+        const translateX = mastPivot * (1 - visualScaleX);
+        playerCrane.setAttribute("transform", `matrix(${visualScaleX} 0 0 1.3 ${translateX} -153)`);
+        craneTrolley.setAttribute("transform", `translate(${trolleyX - trolleyHome} 0)`);
+        hoistLine.setAttribute("d", `M528 175V${hookY}`);
+        hook.setAttribute("transform", `translate(0 ${hookY - 333})`);
+        if (carriedBeam) {
+          const top = hookScreenY();
+          carriedBeam.element.setAttribute("transform", `translate(${trolleyScreenX()} ${top - 465})`);
+        }
+        updateTargetHighlight();
+      }
+
+      function toggleBeam() {
+        if (turning) {
+          setStatus("Wait for the crane to finish turning.");
+          return;
+        }
+        if (carriedBeam) {
+          if (activeTargets.length > 0) {
+            const targetIndex = activeTargets[0];
+            const targetTop = targetYs[targetIndex] - 6.5;
+            carriedBeam.element.setAttribute("transform", `translate(720 ${targetTop - 465})`);
+            carriedBeam.state = "placed";
+            carriedBeam.stand.setAttribute("visibility", "hidden");
+            filledTargets.add(targetIndex);
+            setStatus(`Beam ${carriedBeam.id} placed in target ${targetIndex + 1}.`);
+          } else {
+            carriedBeam.x = trolleyScreenX();
+            carriedBeam.element.setAttribute("transform", `translate(${trolleyScreenX()} 0)`);
+            carriedBeam.state = "ground";
+            carriedBeam.stand.setAttribute("visibility", "visible");
+            setStatus("Beam set down. Align it with its highlighted target to place it.");
+          }
+          carriedBeam = null;
+          render();
+          return;
+        }
+
+        if (hookScreenY() < 445) {
+          setStatus("Lower the hook close to a beam to pick it up.");
+          return;
+        }
+
+        const beam = beams.find((item) => item.state === "ground" && Math.abs(item.x - trolleyScreenX()) <= 38);
+        if (!beam) {
+          setStatus("Move the hook over a beam and press Space to pick it up.");
+          return;
+        }
+
+        carriedBeam = beam;
+        beam.state = "carried";
+        beam.stand.setAttribute("visibility", "hidden");
+        setStatus(`Carrying beam ${beam.id} · ${beam.weight.toLocaleString()} lb.`);
+        render();
+      }
+
+      function update(frameTime) {
+        if (!previousFrame) previousFrame = frameTime;
+        const elapsed = Math.min((frameTime - previousFrame) / 1000, 0.05);
+        previousFrame = frameTime;
+        let changed = false;
+        const horizontal = keys.has("ArrowLeft") || keys.has("a") ? -1 : keys.has("ArrowRight") || keys.has("d") ? 1 : 0;
+        const vertical = keys.has("ArrowUp") || keys.has("w") ? -1 : keys.has("ArrowDown") || keys.has("s") ? 1 : 0;
+        if (turning) {
+          const progress = Math.min((frameTime - turnStartedAt) / turnDuration, 1);
+          const eased = 0.5 - Math.cos(Math.PI * progress) / 2;
+          visualScaleX = turnFrom + (turnTo - turnFrom) * eased;
+          if (progress >= 1) {
+            craneOrientation = turnTo;
+            visualScaleX = craneOrientation;
+            turning = false;
+            setStatus(craneOrientation === -1 ? "Crane turned to the opposite side." : "Crane turned back to the near side.");
+          }
+          changed = true;
+        } else if (horizontal) {
+          const shouldTurn = craneOrientation === 1
+            ? horizontal < 0 && trolleyX <= mastPivot
+            : horizontal > 0 && trolleyX <= mastPivot;
+          if (shouldTurn) {
+            turning = true;
+            turnFrom = craneOrientation;
+            turnTo = -craneOrientation;
+            turnStartedAt = frameTime;
+            visualScaleX = craneOrientation;
+            setStatus("Crane is turning to the other side...");
+          } else {
+          const localDirection = horizontal * craneOrientation;
+          const localMaximum = craneOrientation === 1 ? 810 : 620;
+          trolleyX = Math.max(mastPivot, Math.min(localMaximum, trolleyX + localDirection * 125 * elapsed));
+          }
+          changed = true;
+        }
+        if (vertical) {
+          hookY = Math.max(175, Math.min(490, hookY + vertical * 115 * elapsed));
+          changed = true;
+        }
+        if (changed) render();
+        requestAnimationFrame(update);
+      }
+
+      window.addEventListener("keydown", (event) => {
+        const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+        if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(key)) event.preventDefault();
+        if (key === " " && !event.repeat) toggleBeam();
+        else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "a", "d", "w", "s"].includes(key)) keys.add(key);
+      });
+
+      window.addEventListener("keyup", (event) => {
+        const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+        keys.delete(key);
+      });
+      window.addEventListener("blur", () => keys.clear());
+      render();
+      requestAnimationFrame(update);
+    })();
+  </script>
 </body>
 </html>

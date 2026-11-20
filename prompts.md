@@ -93,3 +93,19 @@
 - **What you asked:** Move the counterweight, make it a little bigger, and align its bottom with the boom's lower rail.
 - **What changed:** Shifted the player crane counterweight farther toward the rear jib tip, enlarged it, and set its lower edge to the lower rail height.
 - **Whether it worked:** The counterweight now ends at the lower rail and is larger and farther back.
+## 23. Implement step 2: crane controls and beam handling
+- **What you asked:** Move to step 2 of the implementation plan.
+- **What changed:** Added arrow-key and WASD controls for trolley and hook movement, movement limits, Space-bar pickup/release for one beam at a time, proximity pickup, target highlighting, and automatic placement at the matching highlighted target. Updated the Inputs section in `spec.md` to describe the implemented key mapping.
+- **Whether it worked:** The controls and beam interactions are implemented in `index.html`; the specification now reflects their key mapping.
+## 24. Fix hoist cable and target behavior
+- **What you asked:** Make the cable extend and retract with hook movement, and let every target light up and accept any beam when it is over that target.
+- **What changed:** Updated the hoist line path from the hook's position, changed target highlighting to check the carried beam against every unfilled target, and made release snap the beam into whichever unfilled target is highlighted. Updated the Inputs wording in `spec.md` to match.
+- **Whether it worked:** The cable and target behavior are implemented in `index.html`.
+## 25. Mirror the player crane at the mast pivot
+- **What you asked:** When the trolley reaches the center and the player continues pressing left, mirror the player crane over the vertical axis to reach objects on the opposite side.
+- **What changed:** Added a mast-pivot orientation switch that mirrors the player crane when the trolley reaches the pivot and movement continues through it, mapped trolley and carried-beam positions to the mirrored side, placed one pickup beam on that side, and documented the behavior in `spec.md`.
+- **Whether it worked:** The opposite-side crane orientation and pickup reach are implemented.
+## 26. Animate the crane mirror transition
+- **What you asked:** Make the mirror transition slow and make it look like the crane is turning.
+- **What changed:** Replaced the instant mirror with a 1.6-second eased horizontal turn through an edge-on position. The trolley and carried beam remain attached while the turn runs, and trolley movement pauses until it finishes. Updated `spec.md` to describe the slow turn.
+- **Whether it worked:** The player crane now animates its turn between orientations.
