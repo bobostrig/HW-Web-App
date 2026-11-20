@@ -45,3 +45,51 @@
 - **What you asked:** Add the approved six-step game creation plan to the bottom of `spec.md`.
 - **What changed:** Appended the Implementation Plan section with the six reviewed steps.
 - **Whether it worked:** Yes. The plan is at the end of `spec.md`.
+## 11. Build the first game step
+- **What you asked:** Complete step 1 of the implementation plan and build out the app scene and layout.
+- **What changed:** Replaced the starter page in `index.html` with a responsive 2D construction-site scene, crane and tower illustration, three beam weights, and persistent top-of-screen status boxes.
+- **Whether it worked:** The scene and layout are in place. Gameplay controls and interactions remain for later implementation steps.
+## 12. Refine crane and tower proportions
+- **What you asked:** Make the cranes less blocky and taller, make the tower taller, and reduce the amount of visible ground.
+- **What changed:** Reworked both crane masts and booms as open lattice structures, increased the vertical scale of the construction scene, raised the crane and tower proportions, and reduced the visible ground area.
+- **Whether it worked:** The SVG scene has been updated to reflect those visual changes.
+## 13. Refine the scene proportions and labels
+- **What you asked:** Make the crane mast centers rectangular, remove the scene labels, restore the earlier zoomed-out view, and make the cranes and worker taller in that view.
+- **What changed:** Restored the original scene framing, made both crane masts rectangular lattice frames, scaled the cranes and tower taller without enlarging the ground area, enlarged the worker, and removed the requested crane and site labels.
+- **Whether it worked:** The scene markup reflects the requested changes.
+## 14. Adjust the zoom and crane centers
+- **What you asked:** Make crane centers rectangular, remove five crane and site labels, restore the zoomed-out view, and make the cranes and builder taller in that view.
+- **What changed:** Restored the earlier scene framing, changed both crane masts to rectangular lattice structures, kept the cranes and central tower taller through local scaling, enlarged the worker, and removed the requested visible labels.
+- **Whether it worked:** The SVG scene reflects the requested changes.
+## 15. Raise the tower and correct crane tops
+- **What you asked:** Make the tower and automatic crane taller, and correct both crane heads so each has a long main boom on one side and a short counter-jib with counterweights on the back.
+- **What changed:** Increased the tower and automatic crane height, separated the player and automatic crane main booms from their shorter counter-jibs, added counterweight blocks, and moved the player trolley onto its main boom.
+- **Whether it worked:** The SVG scene now represents the requested crane configuration.
+## 16. Raise the crane booms and resize the worker
+- **What you asked:** Keep the tower at its current height, move both crane booms above it, and make the red worker smaller and standing on top of the beam.
+- **What changed:** Kept the tower scale, raised the crane masts and boom assemblies above the tower, and reduced and repositioned the worker so his feet align with the beam surface.
+- **Whether it worked:** The SVG scene reflects the requested adjustments.
+## 17. Move status boxes into the scene
+- **What you asked:** Make the status boxes smaller and place them on the same screen as the cranes.
+- **What changed:** Moved the status cards into the game scene as a compact, translucent overlay and adjusted their sizes and responsive layout.
+- **Whether it worked:** The boxes are now positioned within the crane scene.
+## 18. Move smaller status boxes to the ground area
+- **What you asked:** Keep the outputs in separate boxes, make them much smaller, and place them in the ground beneath the cranes and tower.
+- **What changed:** Changed the status overlay to compact individual cards grouped along the bottom of the scene, over the ground area, with a wrapping layout for narrow screens.
+- **Whether it worked:** The boxes are now positioned along the bottom of the crane scene.
+## 19. Improve beam weight label readability
+- **What you asked:** Make the beam weight labels a little bigger because they were hard to see.
+- **What changed:** Increased the three beam weight tags' text size slightly and widened/tallened their backing labels.
+- **Whether it worked:** The beam weight labels are larger in the scene.
+## 20. Enlarge beam weight labels again
+- **What you asked:** Make the beam weight labels just a little bigger.
+- **What changed:** Increased the weight text from 11.5 to 12.5 px and adjusted the tag dimensions slightly.
+- **Whether it worked:** The labels are slightly larger.
+## 21. Connect the player crane boom continuously
+- **What you asked:** Make the player crane boom look like one continuous beam through to the counterweight.
+- **What changed:** Joined the main boom and counter-jib with continuous upper and lower rails through the mast, and repositioned the counterweight against the rear jib.
+- **Whether it worked:** The player crane boom markup now forms one continuous beam.
+## 22. Move and enlarge the player crane counterweight
+- **What you asked:** Move the counterweight, make it a little bigger, and align its bottom with the boom's lower rail.
+- **What changed:** Shifted the player crane counterweight farther toward the rear jib tip, enlarged it, and set its lower edge to the lower rail height.
+- **Whether it worked:** The counterweight now ends at the lower rail and is larger and farther back.
