@@ -110,3 +110,11 @@ Interpolation at 112 ft: 9,000 + (12/25) × (7,000 − 9,000) = 9,000 − 960 = 
 
 1. **Worker hazard:** A worker wearing red clothing, a hardhat, and carrying a hammer walks on the unfinished tower. The player must avoid hitting him with a beam. If a beam hits the worker, show him falling and immediately fail the level.
 2. **Birds and load sway:** Black 2D birds occasionally fly across the sky and may hit the load cable. When a bird hits, the cable buckles and the beam swings wildly. The player cannot control or steady the load; it settles on its own.
+## Implementation Plan
+
+1. **Build the game scene and layout.** Create the 2D side view with the ground, city skyline, central unfinished tower, both cranes, three target spaces, and the top-of-screen output boxes.
+2. **Make the player crane controllable.** Add arrow-key and WASD controls for crane and trolley movement, plus hook raising and lowering. Implement Space to pick up or release one beam at a time, with the trolley and hook movement limits.
+3. **Add load capacity and beam generation.** Calculate radius and capacity continuously. Generate three beams and pickup and target locations per level so every beam can be moved along its full route without reaching the tip-over threshold. Add the 90% warning and crane collapse at 100%.
+4. **Add the level objective and progression.** Make highlighted target spaces accept a released beam. Track the three placements, three-minute timer, score, and progress through five increasingly difficult levels.
+5. **Add hazards and failure behavior.** Animate the other crane placing beams that can obstruct the player. Add the walking worker and level failure if a beam hits him. Add birds that can hit the cable and make the beam swing wildly.
+6. **Add the high score and finish the presentation.** Save and display the high score locally in the browser. Refine the realistic, medium-detail visuals, animations, feedback, and screen layout.

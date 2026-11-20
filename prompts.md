@@ -41,3 +41,7 @@
 - **What you asked:** Replace Features with the approved worker hazard and bird-induced wild load sway descriptions.
 - **What changed:** Replaced the Features section in `spec.md` with the reviewed wording.
 - **Whether it worked:** Yes. The updated Features section is in place.
+## 10. Add the implementation plan
+- **What you asked:** Add the approved six-step game creation plan to the bottom of `spec.md`.
+- **What changed:** Appended the Implementation Plan section with the six reviewed steps.
+- **Whether it worked:** Yes. The plan is at the end of `spec.md`.
