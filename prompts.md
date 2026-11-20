@@ -33,3 +33,7 @@
 - **What you asked:** Add the worker-hit consequence to the Look and feel proposal and update the spec section.
 - **What changed:** Replaced the Look and feel section in `spec.md` with the proposal, including that a beam hit makes the worker fall and immediately fails the level.
 - **Whether it worked:** Yes. The updated section is in place.
+## 8. Update the Out of scope section
+- **What you asked:** Replace Out of scope with the revised proposal, excluding the worker detail and using the shortened accounts and online features line.
+- **What changed:** Updated the Out of scope section in `spec.md` with the approved wording.
+- **Whether it worked:** Yes. The revised section is in place.

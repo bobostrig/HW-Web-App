@@ -100,8 +100,12 @@ When capacity reaches 90%, make the capacity percentage box at the top of the sc
 Interpolation at 112 ft: 9,000 + (12/25) × (7,000 − 9,000) = 9,000 − 960 = 8,040.
 
 ## Out of scope
-Not for communication just for fun and simple. Not for real world use
 
+- This is a simple game for fun, not a real crane simulator, operator training tool, or source of real-world safety guidance.
+- Crane capacities and movement are simplified for gameplay and do not represent engineering calculations or certified load charts.
+- The game is a 2D side view; 3D graphics and camera controls are not included.
+- The game includes five levels; extra game modes and a level editor are not included.
+- No accounts or online features; the high score is saved locally in the player's browser.
 ## Features
 1. There will be a guy walking on the uncompleted tower in red that you can't hit
 2. There will be birds flying in the sky that when they hit the cable holding the load it sways a lot
