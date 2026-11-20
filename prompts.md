@@ -157,3 +157,31 @@
 - **What you asked:** Make the timeout screen's restart button restart the entire game and reset the score, rather than restarting only the current level.
 - **What changed:** Timeout now shows a Restart Game button that returns to level 1 and clears the score. Overload failure continues to offer Restart Level. Updated `spec.md` to describe the separate restart behavior.
 - **Whether it worked:** The timeout button now invokes the full-game restart path.
+## 39. Implement step 5: hazards and failure behavior
+- **What you asked:** Move to part 5 of the implementation plan.
+- **What changed:** Animated the automatic crane's trolley and suspended beam so it lowers across a player target, temporarily blocks placement, and adds beams to the tower. Made the worker walk with animated legs and trigger a failure collapse if the player's carried beam hits him. Added a bird that flies across the scene; a cable strike now kinks the cable and sends the carried load into a damped wild swing. Updated the feature and step 5 descriptions in `spec.md`.
+- **Whether it worked:** The automatic crane obstruction, worker collision, and bird-triggered load sway are implemented in `index.html`.
+## 40. Penalize collisions without ending the level
+- **What you asked:** When the player's beam hits the worker or the other crane's moving beam, subtract 10 points and show a large red -10 instead of stopping the game.
+- **What changed:** Replaced worker-hit failure with a 10-point deduction, added collision detection for the automatic crane's moving load, and added a large animated red -10 popup. The score can go below zero. Updated `spec.md`; timeout and overload still trigger their existing failure scenes.
+- **Whether it worked:** Both collision types now deduct points once per contact and allow play to continue.
+## 41. Vary bird altitude and sway the empty hook
+- **What you asked:** Make bird strikes sway the cable even when no beam is being carried, and have birds fly at different altitudes.
+- **What changed:** Removed the carried-beam requirement for bird strikes, detect actual bird/cable overlap, vary the bird's altitude on each pass, and keep rendering the cable and hook through the sway animation. Updated the bird and sway requirements in `spec.md`.
+- **Whether it worked:** A bird can now strike the cable and swing the hook with or without a carried beam; the attached beam follows the same motion.
+## 42. Add a pause button
+- **What you asked:** Add a pause button in the upper-left corner.
+- **What changed:** Added an upper-left Pause/Resume button and a paused overlay. Pausing stops the timer and all game animations; resuming adjusts the game clocks so paused time is not counted. Documented the control in `spec.md`.
+- **Whether it worked:** The button toggles pause and resume during an active level.
+## 43. Have the automatic crane serve every tower level
+- **What you asked:** Make the animated crane carry beams to all parts of the tower instead of returning to the same spot.
+- **What changed:** Shortened its placement cycle and made its target height advance through the lower, middle, and upper tower levels, then continue cycling through them. Updated the step 5 requirement in `spec.md`.
+- **Whether it worked:** The moving crane load now visits all three target heights and places its first three beams at different levels.
+## 44. Penalize empty-hook collisions
+- **What you asked:** Deduct points when the player hits the worker or the other crane's moving beam even when no beam is on the hook.
+- **What changed:** Extended collision checks to use the bare hook's contact area when no beam is carried, while retaining the wider beam collision area when loaded. Either contact now applies the same 10-point penalty and red popup. Updated the collision rules in `spec.md`.
+- **Whether it worked:** Empty-hook contact with either hazard now triggers the same penalty without ending the level.
+## 45. Fix worker collision position
+- **What you asked:** Fix worker collisions, which were not deducting points even though crane collisions worked.
+- **What changed:** Corrected the worker's collision position to match where the animated worker is drawn, so both the bare hook and a carried beam can register contact and apply the existing 10-point penalty.
+- **Whether it worked:** The worker collision check now uses the worker's actual on-screen height.

@@ -2,7 +2,7 @@
 A crane operation game where the player uses the left tower crane to place three steel pieces in their highlighted target locations on each of five increasingly difficult levels. The time limits are 2:00, 1:30, 1:00, 0:45, and 0:30. The player must manage the load's changing capacity as the crane reaches farther out. This is a simple game inspired by crane load charts, not a tool for real-world crane operation.
 ## Inputs
 
-Use either the arrow keys or WASD. Left and right move the trolley along the player's crane boom; up and down raise and lower the hook. When the trolley reaches the mast center, continuing to press toward the other side slowly turns the player crane around the mast so the trolley can reach the opposite side. The trolley cannot travel past the boom's ends, and the hook can move from boom height to ground level. The crane and trolley move at a steady, moderate speed. Press Space to pick up a beam when the hook is close enough, or release a carried beam. Only one beam can be carried at a time. When the carried beam is over an unfilled highlighted target, pressing Space places it there automatically. The player cannot steady a swaying load.
+Use either the arrow keys or WASD. Left and right move the trolley along the player's crane boom; up and down raise and lower the hook. When the trolley reaches the mast center, continuing to press toward the other side slowly turns the player crane around the mast so the trolley can reach the opposite side. The trolley cannot travel past the boom's ends, and the hook can move from boom height to ground level. The crane and trolley move at a steady, moderate speed. Press Space to pick up a beam when the hook is close enough, or release a carried beam. Only one beam can be carried at a time. When the carried beam is over an unfilled highlighted target, pressing Space places it there automatically. Use the upper-left Pause button to freeze the game; press Resume to continue. Pausing freezes the timer, cranes, worker, birds, and load sway. The player cannot steady a swaying load.
 ## Calculations
 
 ### Crane capacity by load radius
@@ -87,6 +87,8 @@ Display these outputs in boxes that remain visible at the top of the screen duri
 Show a start screen and begin the first level only after the player clicks Start Game. Set level time limits to 2:00, 1:30, 1:00, 0:45, and 0:30. Placing all three beams completes the level and starts the next one, with a total of five levels. Beam weights increase at every level. If time reaches zero before all three beams are placed, play the crane and tower collapse scene, make the worker fall and bounce on the ground, then show a Level Failed screen with a Restart Game button. Restarting after a timeout returns to level 1 and resets the score to zero. Completing level five ends the game with a completion screen.
 
 Award 100 points for each beam placed and a 200-point bonus for completing a level. Keep the score across levels and display the current level and number of beams remaining.
+
+If the player's hook or carried beam hits the walking worker or the automatic crane's moving beam, subtract 10 points and briefly show a large red “-10” on screen. These collisions do not stop the level. The score may drop below zero.
 ## Look and feel
 
 Show the game in a 2D side view. The ground runs along the bottom of the screen, with a city skyline in the background. Place the unfinished steel tower in the middle, with one tower crane on each side.
@@ -95,9 +97,9 @@ The player operates the crane on the left. It has a long boom, a box-shaped trol
 
 The crane on the right is also in the foreground and clearly visible. It moves automatically, continuously placing its own beams. Those beams can sometimes get in the way of the player’s crane as the player places beams.
 
-Use realistic graphics and colors with a medium level of detail. Show a worker wearing red clothing and a hardhat, carrying a hammer, as he walks on the unfinished tower. If a beam hits the worker, show the worker falling and immediately mark the level as failed. The worker also falls from the tower and bounces on the ground when the crane overloads or time expires.
+Use realistic graphics and colors with a medium level of detail. Show a worker wearing red clothing and a hardhat, carrying a hammer, as he walks on the unfinished tower. If the player's hook or beam hits the worker or the automatic crane's moving beam, subtract 10 points and show a large red “-10” popup without stopping the level. The worker falls from the tower and bounces on the ground when the crane overloads or time expires.
 
-Show black 2D birds flying in the sky. When a bird hits the cable, make the cable buckle and the load sway strongly.
+Show black 2D birds flying across the sky at varying altitudes. When a bird hits the cable, make the cable and hook sway strongly whether or not a beam is attached; an attached beam sways with them.
 
 When capacity reaches 90%, make the capacity percentage box at the top of the screen flash red.
 ## Validation
@@ -117,13 +119,13 @@ When capacity reaches 90%, make the capacity percentage box at the top of the sc
 - No accounts or online features; the high score is saved locally in the player's browser.
 ## Features
 
-1. **Worker hazard:** A worker wearing red clothing, a hardhat, and carrying a hammer walks on the unfinished tower. The player must avoid hitting him with a beam. If a beam hits the worker, show him falling and immediately fail the level.
-2. **Birds and load sway:** Black 2D birds occasionally fly across the sky and may hit the load cable. When a bird hits, the cable buckles and the beam swings wildly. The player cannot control or steady the load; it settles on its own.
+1. **Worker hazard:** A worker wearing red clothing, a hardhat, and carrying a hammer walks along the unfinished tower. If the player's hook or carried beam hits him, subtract 10 points and show a large red “-10” popup without ending the level. Timeout and overload failures still make him fall and bounce on the ground.
+2. **Birds and load sway:** Black 2D birds occasionally fly across the sky at varying altitudes and may hit the load cable. When a bird hits, the cable buckles and the hook sways wildly, even when no beam is attached. Any carried beam swings with the hook. The player cannot control or steady the load; it settles on its own.
 ## Implementation Plan
 
 1. **Build the game scene and layout.** Create the 2D side view with the ground, city skyline, central unfinished tower, both cranes, three target spaces, and the top-of-screen output boxes.
 2. **Make the player crane controllable.** Add arrow-key and WASD controls for crane and trolley movement, plus hook raising and lowering. Implement Space to pick up or release one beam at a time, with the trolley and hook movement limits.
 3. **Add load capacity and beam generation.** Calculate radius and capacity continuously. Generate three beams and pickup and target locations per level so every beam can be moved along its full route without reaching the tip-over threshold. Add the 90% warning and crane collapse at 100%.
 4. **Add the level objective and progression.** Make highlighted target spaces accept a released beam. Track the three placements, level timers of 2:00, 1:30, 1:00, 0:45, and 0:30, score, and progress through five increasingly difficult levels.
-5. **Add hazards and failure behavior.** Animate the other crane placing beams that can obstruct the player. Add the walking worker and level failure if a beam hits him. Add birds that can hit the cable and make the beam swing wildly.
+5. **Add hazards and failure behavior.** Animate the automatic crane moving its trolley and placing beams at the lower, middle, and upper parts of the tower so its load sometimes blocks a player target until it moves clear. Animate the red worker walking on the tower. If the player's hook or beam collides with the worker or the automatic crane's moving beam, subtract 10 points and show a large red “-10” popup without stopping the level. Fly birds across the scene at varying altitudes; a bird strike makes the cable and hook sway wildly whether or not a beam is attached, and any carried beam swings until it settles.
 6. **Add the high score and finish the presentation.** Save and display the high score locally in the browser. Refine the realistic, medium-detail visuals, animations, feedback, and screen layout.

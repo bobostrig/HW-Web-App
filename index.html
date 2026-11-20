@@ -140,6 +140,60 @@
     .start-button:hover { background: #ffd389; }
     .start-button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 
+    .penalty-popup {
+      display: none;
+      position: absolute;
+      z-index: 3;
+      top: 38%;
+      left: 50%;
+      color: #ff3434;
+      font-size: clamp(42px, 8vw, 74px);
+      font-weight: 1000;
+      line-height: 1;
+      text-shadow: 0 3px 4px #180b0b, 0 0 22px rgb(255 25 25 / 70%);
+      pointer-events: none;
+    }
+    .penalty-popup.show { display: block; animation: penalty-pop 1.15s ease-out forwards; }
+    @keyframes penalty-pop {
+      0% { opacity: 0; transform: translate(-50%, 12px) scale(.65); }
+      18% { opacity: 1; transform: translate(-50%, 0) scale(1.12); }
+      35% { transform: translate(-50%, -5px) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -52px) scale(.95); }
+    }
+
+    .pause-button {
+      position: absolute;
+      z-index: 6;
+      top: 10px;
+      left: 10px;
+      padding: 8px 13px;
+      border: 1px solid rgb(255 255 255 / 28%);
+      border-radius: 7px;
+      background: rgb(12 26 36 / 94%);
+      color: #f3f7f8;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .pause-button:hover:not(:disabled) { background: #28404c; }
+    .pause-button:disabled { opacity: .55; cursor: default; }
+    .pause-button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+    .pause-overlay {
+      display: none;
+      position: absolute;
+      z-index: 4;
+      inset: 0;
+      place-content: center;
+      background: rgb(7 17 25 / 66%);
+      color: #fff6e7;
+      font-size: clamp(30px, 5vw, 52px);
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
     .fail-panel strong { display: block; color: #ff8980; font-size: 13px; letter-spacing: .15em; text-transform: uppercase; }
     .reset-button {
       margin-top: 11px;
@@ -203,6 +257,7 @@
     </header>
 
     <section class="game-frame" aria-label="Tower crane construction site">
+      <button class="pause-button" id="pause-game" type="button" disabled>Pause</button>
       <section class="hud" aria-label="Game status">
         <div class="hud-card timer"><span class="hud-label">Time left</span><span class="hud-value" id="timer-value">03:00</span></div>
         <div class="hud-card"><span class="hud-label">Score</span><span class="hud-value" id="score-value">0</span></div>
@@ -277,6 +332,7 @@
         <g transform="translate(0 510) scale(1 1.5) translate(0 -510)" fill="#d5f7f4" font-size="10" font-weight="800" letter-spacing="1.5" text-anchor="middle">
           <text x="720" y="416">TARGET 01</text><text x="720" y="334">TARGET 02</text><text x="720" y="279">TARGET 03</text>
         </g>
+        <g id="auto-placed-beams" aria-hidden="true"></g>
         <path d="M625 261V230m190 31v-31" transform="translate(0 510) scale(1 1.5) translate(0 -510)" stroke="#819196" stroke-width="8"/>
         </g>
 
@@ -325,13 +381,15 @@
           <text id="beam-weight-3" x="0" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">5,000 lb</text>
         </g>
         <!-- Worker on a tower beam -->
+        <g id="worker-walk">
         <g id="tower-worker" transform="translate(0 510) scale(1 1.5) translate(0 -510) translate(746 335) scale(1 .9)" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M-6 27v18m8-18 9 17" stroke="#35444a" stroke-width="5"/>
+          <path id="worker-legs" d="M-6 27v18m8-18 9 17" stroke="#35444a" stroke-width="5"/>
           <path d="M-8 9h15l5 20H-12z" fill="#c7463b" stroke="#792f2b" stroke-width="2"/>
           <path d="M-4 8-12 19m19-10 9 8" fill="none" stroke="#c7463b" stroke-width="5"/>
           <circle cx="0" cy="0" r="7" fill="#bd8565" stroke="#644c43" stroke-width="2"/>
           <path d="M-8-4h16l-3-5h-10z" fill="#f2bd54" stroke="#805b2b" stroke-width="2"/>
           <path d="M15 14 21 7l3 2-6 8" stroke="#8d6940" stroke-width="3"/>
+        </g>
         </g>
 
         <!-- Automatic crane on the right -->
@@ -344,17 +402,28 @@
           <path d="M780 208h300" stroke="#785d37" stroke-opacity=".75" stroke-width="2"/>
           <path d="M1321 180h28v42h-28z" fill="#66594a" stroke="#3c4140" stroke-width="4"/>
           <path d="M1325 188h20v5h-20m0 8h20v5h-20m0 8h20v5h-20" stroke="#b49a6a" stroke-width="2"/>
-          <path d="M902 197h40v25h-40z" fill="#d4a956" stroke="#5a4b31" stroke-width="4"/>
-          <circle cx="910" cy="224" r="5" fill="#51452f"/><circle cx="934" cy="224" r="5" fill="#51452f"/>
-          <path d="M922 222v110" stroke="#273943" stroke-width="3"/>
-          <path d="M913 329h18l-2 18h-14z" fill="#a8b2ae" stroke="#394951" stroke-width="3"/>
-          <path d="M909 347h25l-4 12h-18z" fill="#56686e"/>
-          <circle cx="922" cy="199" r="5" fill="#ffdf91"/>
+          <g id="auto-trolley">
+            <path d="M902 197h40v25h-40z" fill="#d4a956" stroke="#5a4b31" stroke-width="4"/>
+            <circle cx="910" cy="224" r="5" fill="#51452f"/><circle cx="934" cy="224" r="5" fill="#51452f"/>
+            <path id="auto-hoist-line" d="M922 222v110" stroke="#273943" stroke-width="3"/>
+            <g id="auto-hook">
+              <path d="M913 329h18l-2 18h-14z" fill="#a8b2ae" stroke="#394951" stroke-width="3"/>
+              <path d="M909 347h25l-4 12h-18z" fill="#56686e"/>
+            </g>
+            <circle cx="922" cy="199" r="5" fill="#ffdf91"/>
+          </g>
+        </g>
+        <g id="auto-beam" transform="translate(922 260)">
+          <rect x="-41" y="-7" width="82" height="14" rx="2" fill="#c4a65f" stroke="#554a36" stroke-width="3"/>
+          <path d="M-25-7v14m50-14v14" stroke="#625539" stroke-width="3"/>
         </g>
 
         <!-- Black birds -->
         <g fill="none" stroke="#18242a" stroke-width="4" stroke-linecap="round">
           <path d="m902 116 10-9 10 9 10-9 10 9"/><path d="m977 157 8-7 8 7 8-7 8 7"/><path d="m853 176 7-6 7 6 7-6 7 6"/>
+        </g>
+        <g id="bird-strike" fill="none" stroke="#18242a" stroke-width="4" stroke-linecap="round" transform="translate(-80 205)" aria-hidden="true">
+          <path d="m0 10 10-9 10 9 10-9 10 9"/>
         </g>
 
         <g id="crash-overlay" display="none" text-anchor="middle">
@@ -370,6 +439,8 @@
         <strong id="result-title">Level failed</strong>
         <button class="reset-button" id="reset-level" type="button">Restart level</button>
       </div>
+      <div class="penalty-popup" id="penalty-popup" aria-live="polite" aria-atomic="true">-10</div>
+      <div class="pause-overlay" id="pause-overlay" aria-live="polite" aria-hidden="true">Paused</div>
       <div class="start-panel" id="start-panel" role="dialog" aria-labelledby="start-title" aria-describedby="start-description">
         <h2 id="start-title">High Steel</h2>
         <p id="start-description">Place three steel beams in each level. Every level brings heavier loads. Keep each lift within the crane’s capacity.</p>
@@ -391,6 +462,14 @@
       const craneTrolley = document.getElementById("player-trolley");
       const hoistLine = document.getElementById("hoist-line");
       const hook = document.getElementById("hook");
+      const autoTrolley = document.getElementById("auto-trolley");
+      const autoHoistLine = document.getElementById("auto-hoist-line");
+      const autoHook = document.getElementById("auto-hook");
+      const autoBeamElement = document.getElementById("auto-beam");
+      const autoPlacedBeams = document.getElementById("auto-placed-beams");
+      const workerWalk = document.getElementById("worker-walk");
+      const workerLegs = document.getElementById("worker-legs");
+      const strikeBird = document.getElementById("bird-strike");
       const status = document.getElementById("game-status");
       const radiusValue = document.getElementById("radius-value");
       const capacityValue = document.getElementById("capacity-value");
@@ -406,6 +485,9 @@
       const failureTitle = document.getElementById("failure-title");
       const resultTitle = document.getElementById("result-title");
       const resetButton = document.getElementById("reset-level");
+      const penaltyPopup = document.getElementById("penalty-popup");
+      const pauseButton = document.getElementById("pause-game");
+      const pauseOverlay = document.getElementById("pause-overlay");
       const timerValue = document.getElementById("timer-value");
       const scoreValue = document.getElementById("score-value");
       const levelValue = document.getElementById("level-value");
@@ -420,6 +502,21 @@
       let levelTransition = false;
       let finishedGame = false;
       let failureRestartsGame = false;
+      let levelStartedAt = 0;
+      let workerWalkOffsetX = 0;
+      let workerWalkOffsetY = 0;
+      let autoBeamX = 922;
+      let autoBeamY = 120;
+      let lastAutoPlacementCycle = -1;
+      let activeAutoCycle = -1;
+      let activeAutoTargetIndex = 0;
+      let lastBirdHitCycle = -1;
+      let swayStartedAt = -Infinity;
+      let swayDirection = 1;
+      let workerCollisionActive = false;
+      let autoBeamCollisionActive = false;
+      let paused = false;
+      let pauseStartedAt = 0;
       const targetX = 720;
 
       function levelTimeLimit(level) {
@@ -529,6 +626,7 @@
         if (levelTransition || gameOver) return;
         levelTransition = true;
         gameOver = true;
+        pauseButton.disabled = true;
         keys.clear();
         score += 200;
         updateProgressHud();
@@ -557,6 +655,12 @@
         levelTransition = false;
         finishedGame = false;
         failureRestartsGame = false;
+        paused = false;
+        pauseStartedAt = 0;
+        pauseButton.disabled = false;
+        pauseButton.textContent = "Pause";
+        pauseOverlay.style.display = "none";
+        pauseOverlay.setAttribute("aria-hidden", "true");
         turning = false;
         turnFrom = 1;
         turnTo = 1;
@@ -569,6 +673,22 @@
         activeTargets = [];
         keys.clear();
         previousFrame = 0;
+        levelStartedAt = performance.now();
+        workerWalkOffsetX = 0;
+        workerWalkOffsetY = 0;
+        workerWalk.setAttribute("transform", "translate(0 0)");
+        workerLegs.setAttribute("d", "M-6 27v18m8-18 9 17");
+        autoBeamX = 1000;
+        autoBeamY = 120;
+        lastAutoPlacementCycle = -1;
+        activeAutoCycle = -1;
+        activeAutoTargetIndex = 0;
+        autoPlacedBeams.replaceChildren();
+        lastBirdHitCycle = -1;
+        swayStartedAt = -Infinity;
+        workerCollisionActive = false;
+        autoBeamCollisionActive = false;
+        penaltyPopup.classList.remove("show");
         remainingSeconds = levelTimeLimit(currentLevel);
         filledTargets.clear();
         targetElements.forEach((target) => {
@@ -602,6 +722,135 @@
 
       function trolleyScreenX() {
         return mastPivot + (trolleyX - mastPivot) * visualScaleX;
+      }
+
+      function loadSwayX(now = performance.now()) {
+        const swayTime = (now - swayStartedAt) / 1000;
+        if (swayTime < 0 || swayTime > 5.5) return 0;
+        return swayDirection * 112 * Math.exp(-0.48 * swayTime) * Math.sin(8.2 * swayTime);
+      }
+
+      function loadScreenX() {
+        return trolleyScreenX() + loadSwayX();
+      }
+
+      function automaticBeamBlocksTarget(index) {
+        return Math.abs(autoBeamX - 720) < 95
+          && Math.abs(autoBeamY - targetYs[index]) < 24;
+      }
+
+      function placeAutomaticBeam() {
+        const placedCount = autoPlacedBeams.childElementCount;
+        if (placedCount >= 3) return;
+        const y = targetYs[placedCount];
+        const beam = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        const body = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        body.setAttribute("x", "815");
+        body.setAttribute("y", String(y - 7));
+        body.setAttribute("width", "86");
+        body.setAttribute("height", "14");
+        body.setAttribute("rx", "2");
+        body.setAttribute("fill", "#c4a65f");
+        body.setAttribute("stroke", "#554a36");
+        body.setAttribute("stroke-width", "3");
+        beam.appendChild(body);
+        [-25, 25].forEach((offset) => {
+          const mark = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          mark.setAttribute("d", `M${857 + offset} ${y - 7}v14`);
+          mark.setAttribute("stroke", "#625539");
+          mark.setAttribute("stroke-width", "3");
+          beam.appendChild(mark);
+        });
+        autoPlacedBeams.appendChild(beam);
+      }
+
+      function beamAlignedWithTarget(index) {
+        return Boolean(carriedBeam && !filledTargets.has(index)
+          && Math.abs(hookScreenY() + 6.5 - targetYs[index]) < 18
+          && loadScreenX() >= 648 && loadScreenX() <= 792);
+      }
+
+      function showCollisionPenalty(message) {
+        score -= 10;
+        updateProgressHud();
+        setStatus(`${message} -10 points.`);
+        penaltyPopup.classList.remove("show");
+        void penaltyPopup.offsetWidth;
+        penaltyPopup.classList.add("show");
+      }
+
+      function animateHazards(frameTime) {
+        const elapsed = Math.max(0, (frameTime - levelStartedAt) / 1000);
+
+        const autoCycleDuration = 8;
+        const autoPhase = (elapsed % autoCycleDuration) / autoCycleDuration;
+        const autoCycle = Math.floor(elapsed / autoCycleDuration);
+        if (autoCycle !== activeAutoCycle) {
+          activeAutoCycle = autoCycle;
+          const autoPlacedCount = autoPlacedBeams.childElementCount;
+          activeAutoTargetIndex = autoPlacedCount < 3 ? autoPlacedCount : autoCycle % 3;
+        }
+        autoBeamX = 885 + 115 * Math.cos(autoPhase * Math.PI * 2);
+        const approach = Math.max(0, Math.min(1, (1000 - autoBeamX) / 230));
+        const easedApproach = approach * approach * (3 - 2 * approach);
+        autoBeamY = 120 + (targetYs[activeAutoTargetIndex] - 120) * easedApproach;
+        autoTrolley.setAttribute("transform", `translate(${autoBeamX - 922} 0)`);
+        const autoHookBottom = 510 + (autoBeamY - 8 - 510) / 1.45;
+        autoHoistLine.setAttribute("d", `M922 222V${autoHookBottom - 30}`);
+        autoHook.setAttribute("transform", `translate(0 ${autoHookBottom - 359})`);
+        autoBeamElement.setAttribute("transform", `translate(${autoBeamX} ${autoBeamY})`);
+        const beamReleased = autoPhase >= 0.66 && autoPhase <= 0.9;
+        autoBeamElement.setAttribute("opacity", beamReleased ? "0" : "1");
+        if (autoPhase >= 0.54 && lastAutoPlacementCycle !== autoCycle) {
+          lastAutoPlacementCycle = autoCycle;
+          placeAutomaticBeam();
+        }
+
+        workerWalkOffsetX = Math.sin(elapsed * 0.55) * 48;
+        workerWalkOffsetY = Math.abs(Math.sin(elapsed * 3.4)) * 2;
+        workerWalk.setAttribute("transform", `translate(${workerWalkOffsetX} ${workerWalkOffsetY})`);
+        const stride = Math.sin(elapsed * 5.6);
+        workerLegs.setAttribute("d", `M-6 27l${-6 - stride * 5} 18m${8 + stride * 5} -18l${8 + stride * 5} 18`);
+
+        const birdDuration = 14;
+        const birdCycle = Math.floor(elapsed / birdDuration);
+        const birdX = -80 + ((elapsed % birdDuration) / birdDuration) * 1600;
+        const birdAltitudes = [140, 170, 200, 230, 260, 275];
+        const birdY = birdAltitudes[birdCycle % birdAltitudes.length];
+        strikeBird.setAttribute("transform", `translate(${birdX} ${birdY})`);
+        const cableTopY = 1.3 * 175 - 153;
+        if (birdCycle !== lastBirdHitCycle
+          && Math.abs(birdX + 20 - trolleyScreenX()) < 22
+          && birdY >= cableTopY && birdY <= hookScreenY()) {
+          lastBirdHitCycle = birdCycle;
+          swayStartedAt = frameTime;
+          swayDirection = Math.random() < 0.5 ? -1 : 1;
+          setStatus("A bird hit the cable! The load is swinging wildly.");
+        }
+
+        const playerBeamX = loadScreenX();
+        const playerBeamY = hookScreenY() + 6.5;
+        const hookContactY = hookScreenY() + 22;
+        const workerX = 746 + workerWalkOffsetX;
+        const workerY = 280 + workerWalkOffsetY;
+        const playerContactY = carriedBeam ? playerBeamY : hookContactY;
+        const playerContactHalfHeight = carriedBeam ? 8 : 18;
+        const workerContactHalfWidth = carriedBeam ? 39 : 24;
+        const hitWorker = Math.abs(playerBeamX - workerX) < workerContactHalfWidth
+          && playerContactY + playerContactHalfHeight > workerY - 28
+          && playerContactY - playerContactHalfHeight < workerY + 20;
+        const contactName = carriedBeam ? "Your beam" : "Your hook";
+        if (hitWorker && !workerCollisionActive) showCollisionPenalty(`${contactName} hit the worker.`);
+        workerCollisionActive = hitWorker;
+
+        const automaticBeamVisible = autoBeamElement.getAttribute("opacity") !== "0";
+        const autoBeamContactHalfWidth = carriedBeam ? 82 : 54;
+        const autoBeamContactHalfHeight = carriedBeam ? 20 : 18;
+        const hitAutomaticBeam = automaticBeamVisible
+          && Math.abs(playerBeamX - autoBeamX) < autoBeamContactHalfWidth
+          && Math.abs(playerContactY - autoBeamY) < autoBeamContactHalfHeight;
+        if (hitAutomaticBeam && !autoBeamCollisionActive) showCollisionPenalty(`${contactName} hit the automatic crane's load.`);
+        autoBeamCollisionActive = hitAutomaticBeam;
       }
 
       function setStatus(message) {
@@ -675,6 +924,12 @@
             addSegment(start.x, start.y, end.x, end.y, 6, "#586e78");
           });
         });
+        autoPlacedBeams.querySelectorAll("rect").forEach((beam) => {
+          const x = Number(beam.getAttribute("x"));
+          const y = Number(beam.getAttribute("y")) + Number(beam.getAttribute("height")) / 2;
+          const width = Number(beam.getAttribute("width"));
+          addSegment(x, y, x + width, y, 14, "#c4a65f");
+        });
 
         const mastLevels = [168, 230, 294, 358, 422, 486, 510];
         [286, 334].forEach((x) => {
@@ -711,7 +966,8 @@
       function createFallingWorker() {
         const worker = document.getElementById("tower-worker").cloneNode(true);
         worker.removeAttribute("id");
-        worker.setAttribute("transform", "translate(746 324)");
+        worker.querySelector("#worker-legs")?.removeAttribute("id");
+        worker.setAttribute("transform", `translate(${746 + workerWalkOffsetX} ${324 + workerWalkOffsetY})`);
         worker.setAttribute("opacity", "1");
         debrisGroup.appendChild(worker);
         return worker;
@@ -720,6 +976,10 @@
       function startCollapse(cause = "LOAD LIMIT EXCEEDED") {
         if (gameOver) return;
         gameOver = true;
+        paused = false;
+        pauseButton.disabled = true;
+        pauseOverlay.style.display = "none";
+        pauseOverlay.setAttribute("aria-hidden", "true");
         turning = false;
         keys.clear();
         levelTransition = false;
@@ -817,17 +1077,16 @@
       function updateTargetHighlight() {
         activeTargets = [];
         targetElements.forEach((target, index) => {
-          const beamOverTarget = carriedBeam && !filledTargets.has(index)
-            && Math.abs(hookScreenY() + 6.5 - targetYs[index]) < 18
-            && trolleyScreenX() >= 648 && trolleyScreenX() <= 792;
+          const blockedByAutomaticCrane = !filledTargets.has(index) && automaticBeamBlocksTarget(index);
+          const beamOverTarget = beamAlignedWithTarget(index) && !blockedByAutomaticCrane;
           if (filledTargets.has(index)) {
             target.setAttribute("stroke", "#79d7ac");
             target.setAttribute("stroke-width", "4");
             target.setAttribute("stroke-dasharray", "none");
           } else {
-            target.setAttribute("stroke", beamOverTarget ? "#ffe19b" : "#77d9df");
-            target.setAttribute("stroke-width", beamOverTarget ? "5" : "3");
-            target.setAttribute("stroke-dasharray", beamOverTarget ? "none" : "7 6");
+            target.setAttribute("stroke", blockedByAutomaticCrane ? "#ff8b70" : beamOverTarget ? "#ffe19b" : "#77d9df");
+            target.setAttribute("stroke-width", blockedByAutomaticCrane || beamOverTarget ? "5" : "3");
+            target.setAttribute("stroke-dasharray", blockedByAutomaticCrane || beamOverTarget ? "none" : "7 6");
           }
           if (beamOverTarget) activeTargets.push(index);
         });
@@ -840,11 +1099,15 @@
           playerCrane.setAttribute("transform", `matrix(${visualScaleX} 0 0 1.3 ${translateX} -153)`);
         }
         craneTrolley.setAttribute("transform", `translate(${trolleyX - trolleyHome} 0)`);
-        hoistLine.setAttribute("d", `M528 175V${hookY}`);
-        hook.setAttribute("transform", `translate(0 ${hookY - 333})`);
+        const sway = loadSwayX();
+        const localSway = sway * craneOrientation;
+        const firstKinkY = 175 + (hookY - 175) * 0.36;
+        const secondKinkY = 175 + (hookY - 175) * 0.72;
+        hoistLine.setAttribute("d", `M528 175L${528 + localSway * 0.35} ${firstKinkY}L${528 + localSway * 1.1} ${secondKinkY}L${528 + localSway} ${hookY}`);
+        hook.setAttribute("transform", `translate(${localSway} ${hookY - 333})`);
         if (carriedBeam) {
           const top = hookScreenY();
-          carriedBeam.element.setAttribute("transform", `translate(${trolleyScreenX()} ${top - 465})`);
+          carriedBeam.element.setAttribute("transform", `translate(${loadScreenX()} ${top - 465})`);
         }
         updateCapacity();
         updateTargetHighlight();
@@ -857,6 +1120,12 @@
           return;
         }
         if (carriedBeam) {
+          const blockedTarget = targetElements.findIndex((_, index) =>
+            beamAlignedWithTarget(index) && automaticBeamBlocksTarget(index));
+          if (blockedTarget >= 0) {
+            setStatus("The automatic crane is blocking this target. Wait for it to move clear.");
+            return;
+          }
           if (activeTargets.length > 0) {
             const targetIndex = activeTargets[0];
             const targetTop = targetYs[targetIndex] - 6.5;
@@ -899,7 +1168,7 @@
       }
 
       function update(frameTime) {
-        if (gameOver) return;
+        if (gameOver || paused) return;
         const frameDelta = previousFrame ? Math.max(0, (frameTime - previousFrame) / 1000) : 0;
         const elapsed = Math.min(frameDelta, 0.05);
         previousFrame = frameTime;
@@ -950,13 +1219,17 @@
           hookY = Math.max(175, Math.min(490, hookY + vertical * 115 * elapsed));
           changed = true;
         }
-        if (changed) render();
+        animateHazards(frameTime);
+        if (gameOver) return;
+        if (changed || carriedBeam || frameTime - swayStartedAt <= 5500) render();
+        else updateTargetHighlight();
         requestAnimationFrame(update);
       }
 
       window.addEventListener("keydown", (event) => {
         const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
         if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(key)) event.preventDefault();
+        if (paused) return;
         if (key === " " && !event.repeat) toggleBeam();
         else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "a", "d", "w", "s"].includes(key)) keys.add(key);
       });
@@ -967,6 +1240,28 @@
       });
       window.addEventListener("blur", () => keys.clear());
       resetButton.addEventListener("click", () => finishedGame || failureRestartsGame ? restartGame() : resetLevel());
+      pauseButton.addEventListener("click", () => {
+        if (gameOver || pauseButton.disabled) return;
+        paused = !paused;
+        keys.clear();
+        if (paused) {
+          pauseStartedAt = performance.now();
+          pauseButton.textContent = "Resume";
+          pauseOverlay.style.display = "grid";
+          pauseOverlay.setAttribute("aria-hidden", "false");
+          setStatus("Game paused. Press Resume to continue.");
+        } else {
+          const pausedDuration = performance.now() - pauseStartedAt;
+          levelStartedAt += pausedDuration;
+          if (swayStartedAt > -Infinity) swayStartedAt += pausedDuration;
+          previousFrame = 0;
+          pauseButton.textContent = "Pause";
+          pauseOverlay.style.display = "none";
+          pauseOverlay.setAttribute("aria-hidden", "true");
+          setStatus("Game resumed.");
+          requestAnimationFrame(update);
+        }
+      });
       startButton.addEventListener("click", () => {
         startPanel.style.display = "none";
         beginLevel("Level 1 started. Place all three beams before time runs out.");
