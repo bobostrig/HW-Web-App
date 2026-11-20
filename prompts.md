@@ -185,3 +185,11 @@
 - **What you asked:** Fix worker collisions, which were not deducting points even though crane collisions worked.
 - **What changed:** Corrected the worker's collision position to match where the animated worker is drawn, so both the bare hook and a carried beam can register contact and apply the existing 10-point penalty.
 - **Whether it worked:** The worker collision check now uses the worker's actual on-screen height.
+## 46. Implement step 6: high score and presentation polish
+- **What you asked:** Move to part 6 of the implementation plan.
+- **What changed:** Added a browser-local high score that persists between visits and updates whenever the score sets a new record. Polished the high-score card with a brief record animation, made the timer flash during the final 10 seconds, added city window lights and tower bolts, and corrected the initial timer display to 2:00. Updated the output and feedback details in `spec.md`.
+- **Whether it worked:** The high score now loads from and saves to local storage, and the HUD highlights new records and low time.
+## 47. Change tower layouts across levels
+- **What you asked:** Make the tower layout change at each level and make the later layouts harder.
+- **What changed:** Added five tower layouts with different crossbeam spacing and staggered target positions; narrowed the openings from 144 scene units on level 1 to 66 on level 5. Updated target alignment, auto-crane interference, tower bolts, and collapse debris to follow the active layout. Updated `spec.md` and the level-start message.
+- **Whether it worked:** Each level now loads its own structural layout and progressively tighter targets.

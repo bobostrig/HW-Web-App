@@ -82,9 +82,14 @@
     .hud-value { display: block; margin-top: 2px; color: #f5fafb; font-size: 12px; font-weight: 750; letter-spacing: -.03em; line-height: 1; white-space: nowrap; }
     .hud-value small { color: #aabac3; font-size: 8px; font-weight: 600; letter-spacing: 0; }
     .hud-card.timer .hud-value { color: var(--amber); }
+    .hud-card.timer.urgent { border-color: #ff5e59; animation: capacity-flash .55s steps(2, end) infinite; }
     .hud-card.capacity .hud-value { color: var(--cyan); }
     .hud-card.capacity.warning { border-color: #ff5e59; animation: capacity-flash .55s steps(2, end) infinite; }
+    .hud-card.high-score { border-color: rgb(255 211 137 / 42%); background: linear-gradient(145deg, rgb(46 39 28 / 96%), rgb(21 28 31 / 94%)); }
+    .hud-card.high-score .hud-value { color: #ffd987; }
+    .hud-card.high-score.record-new { animation: record-flash 1.1s ease-out; }
     @keyframes capacity-flash { 50% { background: rgb(126 30 32 / 95%); box-shadow: 0 0 18px rgb(255 75 70 / 65%); } }
+    @keyframes record-flash { 35% { border-color: #fff0b8; box-shadow: 0 0 22px rgb(255 211 137 / 80%); transform: translateY(-3px); } }
 
     .game-frame {
       position: relative;
@@ -259,9 +264,9 @@
     <section class="game-frame" aria-label="Tower crane construction site">
       <button class="pause-button" id="pause-game" type="button" disabled>Pause</button>
       <section class="hud" aria-label="Game status">
-        <div class="hud-card timer"><span class="hud-label">Time left</span><span class="hud-value" id="timer-value">03:00</span></div>
+        <div class="hud-card timer"><span class="hud-label">Time left</span><span class="hud-value" id="timer-value">02:00</span></div>
         <div class="hud-card"><span class="hud-label">Score</span><span class="hud-value" id="score-value">0</span></div>
-        <div class="hud-card"><span class="hud-label">High score</span><span class="hud-value">0</span></div>
+        <div class="hud-card high-score" id="high-score-card"><span class="hud-label">High score</span><span class="hud-value" id="high-score-value">0</span></div>
         <div class="hud-card"><span class="hud-label">Level</span><span class="hud-value"><span id="level-value">1</span> <small>/ 5</small></span></div>
         <div class="hud-card"><span class="hud-label">Radius</span><span class="hud-value"><span id="radius-value">42</span> <small>ft</small></span></div>
         <div class="hud-card capacity" id="capacity-card"><span class="hud-label">Capacity</span><span class="hud-value"><span id="capacity-value">0</span><small>% · <span id="max-capacity-value">20,000 lb</span> max</small></span></div>
@@ -288,6 +293,9 @@
         </g>
         <g fill="#b3b7aa" opacity=".55">
           <path d="M40 440h43V302h16v138h112V351h18v89h82V268h17v172h151V321h15v119h114V288h18v152h137V252h18v188h97V334h17v106h133V294h19v146h115V313h17v127h98V278h18v162h111v65H0z"/>
+        </g>
+        <g fill="#f4dca9" opacity=".4">
+          <path d="M49 316h7v10h-7zm18 0h7v10h-7zm-18 20h7v10h-7zm18 0h7v10h-7zm-18 20h7v10h-7zm18 0h7v10h-7zM301 286h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zM442 339h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zM728 267h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zM1056 309h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zM1283 295h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8z"/>
         </g>
         <g stroke="#d7c9aa" stroke-width="2" opacity=".28">
           <path d="M282 285v139M291 285v139M421 326v98M430 326v98M710 258v166M721 258v166M1038 300v124M1048 300v124M1267 285v139"/>
@@ -319,10 +327,16 @@
         <g id="tower-collapse">
         <!-- Unfinished tower: legs, cross braces, three highlighted bays -->
         <g transform="translate(0 510) scale(1 1.5) translate(0 -510)" stroke="url(#steel)" stroke-linecap="square">
-          <path d="M625 480V261M815 480V261" fill="none" stroke-width="17"/>
-          <path d="M617 458h206M617 376h206M617 294h206M617 261h206" fill="none" stroke="#9aa6a6" stroke-width="12"/>
-          <path d="m625 458 190-82m0 82-190-82M625 376l190-82m0 82-190-82M625 294l190-33m0 0-190-33" fill="none" stroke="#586e78" stroke-width="7"/>
-          <path d="M625 458 815 376M815 458 625 376M625 376 815 294M815 376 625 294" fill="none" stroke="#c8b17f" stroke-opacity=".76" stroke-width="3"/>
+          <path id="tower-columns" d="M625 480V261M815 480V261" fill="none" stroke-width="17"/>
+          <path id="tower-crossbeams" d="M617 458h206M617 376h206M617 294h206M617 261h206" fill="none" stroke="#9aa6a6" stroke-width="12"/>
+          <path id="tower-braces" d="m625 458 190-82m0 82-190-82M625 376l190-82m0 82-190-82M625 294l190-33m0 0-190-33" fill="none" stroke="#586e78" stroke-width="7"/>
+          <path id="tower-gold-braces" d="M625 458 815 376M815 458 625 376M625 376 815 294M815 376 625 294" fill="none" stroke="#c8b17f" stroke-opacity=".76" stroke-width="3"/>
+        </g>
+        <g transform="translate(0 510) scale(1 1.5) translate(0 -510)" fill="#d8c69a" stroke="#495c64" stroke-width="1.5">
+          <circle cx="625" cy="458" r="3"/><circle cx="815" cy="458" r="3"/>
+          <circle cx="625" cy="376" r="3"/><circle cx="815" cy="376" r="3"/>
+          <circle cx="625" cy="294" r="3"/><circle cx="815" cy="294" r="3"/>
+          <circle cx="625" cy="261" r="3"/><circle cx="815" cy="261" r="3"/>
         </g>
         <g transform="translate(0 510) scale(1 1.5) translate(0 -510)" fill="none" stroke="#77d9df" stroke-width="3" stroke-dasharray="7 6" opacity=".9">
           <rect id="target-1" x="648" y="397" width="144" height="27" rx="3"/>
@@ -330,8 +344,9 @@
           <rect id="target-3" x="648" y="267" width="144" height="15" rx="3"/>
         </g>
         <g transform="translate(0 510) scale(1 1.5) translate(0 -510)" fill="#d5f7f4" font-size="10" font-weight="800" letter-spacing="1.5" text-anchor="middle">
-          <text x="720" y="416">TARGET 01</text><text x="720" y="334">TARGET 02</text><text x="720" y="279">TARGET 03</text>
+          <text id="target-label-1" x="720" y="416">TARGET 01</text><text id="target-label-2" x="720" y="334">TARGET 02</text><text id="target-label-3" x="720" y="279">TARGET 03</text>
         </g>
+        <g id="tower-bolts" transform="translate(0 510) scale(1 1.5) translate(0 -510)" fill="#d8c69a" stroke="#495c64" stroke-width="1.5"></g>
         <g id="auto-placed-beams" aria-hidden="true"></g>
         <path d="M625 261V230m190 31v-31" transform="translate(0 510) scale(1 1.5) translate(0 -510)" stroke="#819196" stroke-width="8"/>
         </g>
@@ -490,14 +505,34 @@
       const pauseOverlay = document.getElementById("pause-overlay");
       const timerValue = document.getElementById("timer-value");
       const scoreValue = document.getElementById("score-value");
+      const highScoreValue = document.getElementById("high-score-value");
+      const highScoreCard = document.getElementById("high-score-card");
       const levelValue = document.getElementById("level-value");
       const remainingBeamsValue = document.getElementById("remaining-beams");
       const targetElements = [1, 2, 3].map((number) => document.getElementById(`target-${number}`));
-      const targetYs = [410.5, 328.5, 274.5].map((y) => 510 + 1.5 * (y - 510));
+      const targetLabels = [1, 2, 3].map((number) => document.getElementById(`target-label-${number}`));
+      const towerColumns = document.getElementById("tower-columns");
+      const towerCrossbeams = document.getElementById("tower-crossbeams");
+      const towerBraces = document.getElementById("tower-braces");
+      const towerGoldBraces = document.getElementById("tower-gold-braces");
+      const towerBolts = document.getElementById("tower-bolts");
+      const towerLayouts = [
+        { rows: [458, 376, 294, 261], targets: [410.5, 328.5, 274.5], centers: [720, 720, 720], widths: [144, 144, 144], heights: [27, 27, 15] },
+        { rows: [458, 382, 300, 261], targets: [420, 342, 279], centers: [713, 727, 717], widths: [132, 126, 118], heights: [24, 22, 13] },
+        { rows: [458, 398, 318, 261], targets: [427, 358, 288], centers: [727, 712, 724], widths: [118, 108, 98], heights: [21, 19, 11] },
+        { rows: [458, 385, 335, 261], targets: [421, 360, 296], centers: [711, 729, 713], widths: [104, 92, 82], heights: [18, 16, 10] },
+        { rows: [458, 400, 325, 261], targets: [429, 363, 292], centers: [727, 713, 723], widths: [90, 78, 66], heights: [15, 13, 9] }
+      ];
+      let activeTowerLayout = towerLayouts[0];
+      let targetYs = activeTowerLayout.targets.map((y) => 510 + 1.5 * (y - 510));
+      let targetCenters = [...activeTowerLayout.centers];
+      let targetWidths = [...activeTowerLayout.widths];
       const beamSpawnRanges = [[155, 205], [360, 470], [520, 660]];
       const mastPivot = 310;
+      const highScoreStorageKey = "high-steel-high-score-v1";
       let currentLevel = 1;
       let score = 0;
+      let highScore = loadHighScore();
       let remainingSeconds = 120;
       let levelTransition = false;
       let finishedGame = false;
@@ -517,7 +552,31 @@
       let autoBeamCollisionActive = false;
       let paused = false;
       let pauseStartedAt = 0;
-      const targetX = 720;
+
+      function loadHighScore() {
+        try {
+          const savedScore = Number(window.localStorage.getItem(highScoreStorageKey));
+          return Number.isSafeInteger(savedScore) && savedScore > 0 ? savedScore : 0;
+        } catch {
+          return 0;
+        }
+      }
+
+      function updateHighScore() {
+        if (score > highScore) {
+          highScore = score;
+          try {
+            window.localStorage.setItem(highScoreStorageKey, String(highScore));
+          } catch {
+            // Keep the record for this session if browser storage is unavailable.
+          }
+          highScoreCard.classList.remove("record-new");
+          void highScoreCard.offsetWidth;
+          highScoreCard.classList.add("record-new");
+          window.setTimeout(() => highScoreCard.classList.remove("record-new"), 1200);
+        }
+        highScoreValue.textContent = highScore.toLocaleString();
+      }
 
       function levelTimeLimit(level) {
         return [120, 90, 60, 45, 30][level - 1] ?? 30;
@@ -542,6 +601,41 @@
           }
         }
         return chart[chart.length - 1].capacity;
+      }
+
+      function applyTowerLayout(level) {
+        activeTowerLayout = towerLayouts[Math.max(0, Math.min(towerLayouts.length - 1, level - 1))];
+        targetYs = activeTowerLayout.targets.map((y) => 510 + 1.5 * (y - 510));
+        targetCenters = [...activeTowerLayout.centers];
+        targetWidths = [...activeTowerLayout.widths];
+        const rows = activeTowerLayout.rows;
+        towerColumns.setAttribute("d", `M625 480V${rows[3]}M815 480V${rows[3]}`);
+        towerCrossbeams.setAttribute("d", rows.map((y) => `M617 ${y}h206`).join(" "));
+        const braces = rows.slice(0, -1).map((lower, index) => {
+          const upper = rows[index + 1];
+          return `M625 ${lower}L815 ${upper}M815 ${lower}L625 ${upper}`;
+        }).join(" ");
+        towerBraces.setAttribute("d", braces);
+        towerGoldBraces.setAttribute("d", braces);
+        towerBolts.replaceChildren();
+        rows.forEach((y) => [625, 815].forEach((x) => {
+          const bolt = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          bolt.setAttribute("cx", String(x));
+          bolt.setAttribute("cy", String(y));
+          bolt.setAttribute("r", "3");
+          towerBolts.appendChild(bolt);
+        }));
+        targetElements.forEach((target, index) => {
+          const width = activeTowerLayout.widths[index];
+          const height = activeTowerLayout.heights[index];
+          const rawY = activeTowerLayout.targets[index];
+          target.setAttribute("x", String(targetCenters[index] - width / 2));
+          target.setAttribute("y", String(rawY - height / 2));
+          target.setAttribute("width", String(width));
+          target.setAttribute("height", String(height));
+          targetLabels[index].setAttribute("x", String(targetCenters[index]));
+          targetLabels[index].setAttribute("y", String(rawY + 5.5));
+        });
       }
 
       function radiusAtScreenX(x) {
@@ -599,7 +693,7 @@
           const steps = Math.round((maximumX - minimumX) / 5);
           beam.x = minimumX + Math.floor(Math.random() * (steps + 1)) * 5;
           beam.weight = beam.id === 3
-            ? generateTipRiskWeight(beam.x, targetX, level)
+            ? generateTipRiskWeight(beam.x, targetCenters[beam.id - 1], level)
             : generateBeamWeight(beam.id, level);
           beam.state = "ground";
           beam.element.setAttribute("transform", `translate(${beam.x} 0)`);
@@ -608,12 +702,15 @@
           document.getElementById(`beam-summary-${beam.id}`).textContent = `${beam.weight.toLocaleString()} lb`;
         });
       }
+      applyTowerLayout(currentLevel);
       spawnLevelBeams(currentLevel);
 
       function updateProgressHud() {
         const totalSeconds = Math.ceil(remainingSeconds);
         timerValue.textContent = `${String(Math.floor(totalSeconds / 60)).padStart(2, "0")}:${String(totalSeconds % 60).padStart(2, "0")}`;
+        timerValue.closest(".hud-card").classList.toggle("urgent", totalSeconds <= 10 && totalSeconds > 0);
         scoreValue.textContent = score.toLocaleString();
+        updateHighScore();
         levelValue.textContent = String(currentLevel);
         remainingBeamsValue.textContent = String(beams.filter((beam) => beam.state !== "placed").length);
       }
@@ -646,7 +743,7 @@
         setStatus(`Level ${currentLevel} complete. Preparing level ${currentLevel + 1}...`);
         window.setTimeout(() => {
           currentLevel += 1;
-          beginLevel(`Level ${currentLevel} started. Place all three beams before time runs out.`);
+          beginLevel(`Level ${currentLevel} started with a new tower layout. Place all three beams before time runs out.`);
         }, 900);
       }
 
@@ -691,6 +788,7 @@
         penaltyPopup.classList.remove("show");
         remainingSeconds = levelTimeLimit(currentLevel);
         filledTargets.clear();
+        applyTowerLayout(currentLevel);
         targetElements.forEach((target) => {
           target.setAttribute("stroke", "#77d9df");
           target.setAttribute("stroke-width", "3");
@@ -735,7 +833,7 @@
       }
 
       function automaticBeamBlocksTarget(index) {
-        return Math.abs(autoBeamX - 720) < 95
+        return Math.abs(autoBeamX - targetCenters[index]) < 95
           && Math.abs(autoBeamY - targetYs[index]) < 24;
       }
 
@@ -767,7 +865,7 @@
       function beamAlignedWithTarget(index) {
         return Boolean(carriedBeam && !filledTargets.has(index)
           && Math.abs(hookScreenY() + 6.5 - targetYs[index]) < 18
-          && loadScreenX() >= 648 && loadScreenX() <= 792);
+          && Math.abs(loadScreenX() - targetCenters[index]) <= targetWidths[index] / 2);
       }
 
       function showCollisionPenalty(message) {
@@ -901,7 +999,8 @@
         const towerColor = "#71838a";
         const craneColor = "#d0a257";
 
-        const towerLevels = [261, 294, 376, 458, 480];
+        const rows = activeTowerLayout.rows;
+        const towerLevels = [rows[3], rows[2], rows[1], rows[0], 480];
         [625, 815].forEach((x) => {
           for (let index = 0; index < towerLevels.length - 1; index += 1) {
             const top = towerPoint(x, towerLevels[index]);
@@ -917,7 +1016,7 @@
           addSegment(left.x, left.y, center.x, center.y, 9, "#9aa6a6");
           addSegment(center.x, center.y, right.x, right.y, 9, "#9aa6a6");
         });
-        [[458, 376], [376, 294], [294, 261]].forEach(([lower, upper]) => {
+        [[rows[0], rows[1]], [rows[1], rows[2]], [rows[2], rows[3]]].forEach(([lower, upper]) => {
           [[625, lower, 815, upper], [815, lower, 625, upper]].forEach(([x1, y1, x2, y2]) => {
             const start = towerPoint(x1, y1);
             const end = towerPoint(x2, y2);
@@ -1129,7 +1228,7 @@
           if (activeTargets.length > 0) {
             const targetIndex = activeTargets[0];
             const targetTop = targetYs[targetIndex] - 6.5;
-            carriedBeam.element.setAttribute("transform", `translate(720 ${targetTop - 465})`);
+            carriedBeam.element.setAttribute("transform", `translate(${targetCenters[targetIndex]} ${targetTop - 465})`);
             carriedBeam.state = "placed";
             carriedBeam.stand.setAttribute("visibility", "hidden");
             filledTargets.add(targetIndex);
