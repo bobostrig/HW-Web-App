@@ -35,6 +35,7 @@ TOWER_LAYOUTS = (
 BEAM_SPAWN_RANGES = ((155, 205), (360, 470), (520, 660))
 SAVE_VERSION = 1
 SCENE_SCALES = (1.0, 0.9, 0.8, 0.7, 0.6)
+CAPACITY_EPSILON = 1e-7
 
 
 def capacity_at_radius(radius: float) -> float:
@@ -44,6 +45,11 @@ def capacity_at_radius(radius: float) -> float:
         if radius <= r1:
             return c0 + ((radius - r0) / (r1 - r0)) * (c1 - c0)
     return CAPACITY_CHART[-1][1]
+
+
+def load_at_capacity_fraction(weight: float, capacity: float, fraction: float) -> bool:
+    """Apply a negligible tolerance to capacity thresholds after interpolation."""
+    return weight + CAPACITY_EPSILON >= capacity * fraction
 
 
 def scene_radius(screen_x: float) -> float:
@@ -556,7 +562,7 @@ class HighSteelApp:
             self.hook_y = max(175.0, min(490.0, self.hook_y + vertical * 115 * dt))
         self._animate_hazards(now, dt)
         radius = self.trolley_radius()
-        if self.carried is not None and self.beams[self.carried]["weight"] >= capacity_at_radius(radius):
+        if self.carried is not None and load_at_capacity_fraction(self.beams[self.carried]["weight"], capacity_at_radius(radius), 1.0):
             self._fail("LOAD LIMIT EXCEEDED")
             return
         if now - self.last_draw >= 0.045:
@@ -930,7 +936,7 @@ class HighSteelApp:
         if self.carried is not None:
             weight = self.beams[self.carried]["weight"]
             load_y = graph_y(weight)
-            color = "#ff5e59" if weight / capacity >= 0.9 else "#ffd987"
+            color = "#ff5e59" if load_at_capacity_fraction(weight, capacity, 0.9) else "#ffd987"
             canvas.create_line(left, load_y, x, load_y, fill=color, dash=(4, 3))
             canvas.create_oval(x - 4, load_y - 4, x + 4, load_y + 4, fill=color, outline="#fff")
             self.graph_note.configure(text=f"{weight:,} lb · {weight / capacity:.0%}", fg=color)
@@ -953,7 +959,8 @@ class HighSteelApp:
         capacity = capacity_at_radius(radius)
         percent = self.beams[self.carried]["weight"] / capacity * 100 if self.carried is not None else 0.0
         self.stat_values["radius"].configure(text=f"{radius:.1f} ft")
-        warning_flash = percent >= 90 and blink
+        warning_flash = (self.carried is not None and
+                         load_at_capacity_fraction(self.beams[self.carried]["weight"], capacity, 0.9) and blink)
         self.stat_values["capacity"].configure(text=f"{percent:.0f}% · {capacity:,.0f} lb",
                                                fg="#ff5e59" if warning_flash else "#77d9df")
         self.stat_values["beams"].configure(text=str(3 - len(self.filled_targets)))

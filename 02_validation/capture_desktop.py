@@ -60,6 +60,14 @@ def main() -> None:
             app._draw_graph()
             app._update_hud()
             capture(root, "desktop-step-3-left.png")
+            app.orientation = 1
+            app.trolley_x = APP.MAST_PIVOT + 140 * 500 / 150
+            app.carried = 2
+            app.beams[2]["state"] = "carried"
+            app._draw_scene()
+            app._draw_graph()
+            app._update_hud()
+            capture(root, "desktop-step-3-load.png")
         finally:
             root.destroy()
 

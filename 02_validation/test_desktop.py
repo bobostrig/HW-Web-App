@@ -22,6 +22,10 @@ class CapacityValidation(unittest.TestCase):
 
     def test_warning_threshold(self):
         self.assertAlmostEqual(APP.capacity_at_radius(112) * 0.9, 7236)
+        self.assertTrue(APP.load_at_capacity_fraction(7236, APP.capacity_at_radius(112), 0.9))
+        self.assertFalse(APP.load_at_capacity_fraction(7235, APP.capacity_at_radius(112), 0.9))
+        self.assertTrue(APP.load_at_capacity_fraction(5500, APP.capacity_at_radius(150), 1.0))
+        self.assertFalse(APP.load_at_capacity_fraction(5499, APP.capacity_at_radius(150), 1.0))
 
     def test_radius_is_bounded(self):
         self.assertEqual(APP.scene_radius(-1000), 150)

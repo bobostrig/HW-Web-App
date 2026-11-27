@@ -209,33 +209,33 @@ class DesktopGuiChecks(unittest.TestCase):
 
     def test_level_progression_completion_and_high_score(self):
         self.app.start_game()
-        layout = APP.TOWER_LAYOUTS[0]
-        for target in range(3):
-            self.app.carried = target
-            self.app.beams[target]["state"] = "carried"
-            self.app.trolley_x = layout["centers"][target]
-            target_y = 510 + 1.5 * (layout["targets"][target] - 510)
-            self.app.hook_y = 510 + (target_y - 6.5 - 510) / 1.3
-            self.app.auto_x = 1000
-            self.app.auto_y = 120
-            self.app.toggle_beam()
-            self.assertIn(target, self.app.filled_targets)
-        self.assertEqual((self.app.level, self.app.score), (1, 500))
-        self.assertIsNotNone(self.app.level_after_id)
-        self.root.after_cancel(self.app.level_after_id)
-        self.app.level_after_id = None
-        self.app._advance_level()
-        self.assertTrue(self.app.running)
-        self.assertEqual(self.app.level, 2)
-        self.assertAlmostEqual(self.app.remaining, APP.LEVEL_SECONDS[1], delta=0.1)
-        self.app.level = 5
-        self.app.score = 1800
-        self.app._complete_level()
+        for level in range(1, 6):
+            self.assertEqual(self.app.level, level)
+            layout = APP.TOWER_LAYOUTS[level - 1]
+            for target in range(3):
+                self.app.carried = target
+                self.app.beams[target]["state"] = "carried"
+                self.app.trolley_x = layout["centers"][target]
+                target_y = 510 + 1.5 * (layout["targets"][target] - 510)
+                self.app.hook_y = 510 + (target_y - 6.5 - 510) / 1.3
+                self.app.auto_x = 1000
+                self.app.auto_y = 120
+                self.app.toggle_beam()
+                self.assertIn(target, self.app.filled_targets)
+            self.assertEqual(self.app.score, level * 500)
+            if level < 5:
+                self.assertIsNotNone(self.app.level_after_id)
+                self.root.after_cancel(self.app.level_after_id)
+                self.app.level_after_id = None
+                self.app._advance_level()
+                self.assertTrue(self.app.running)
+                self.assertEqual(self.app.level, level + 1)
+                self.assertAlmostEqual(self.app.remaining, APP.LEVEL_SECONDS[level], delta=0.1)
         self.assertTrue(self.app.finished)
-        self.assertEqual(self.app.score, 2000)
+        self.assertEqual(self.app.score, 2500)
         self.assertEqual(self.app.start_button.cget("text"), "Play Again")
         score_file = Path(self.temp_dir.name) / "high_score.json"
-        self.assertEqual(json.loads(score_file.read_text(encoding="utf-8"))["high_score"], 2000)
+        self.assertEqual(json.loads(score_file.read_text(encoding="utf-8"))["high_score"], 2500)
 
 
 if __name__ == "__main__":

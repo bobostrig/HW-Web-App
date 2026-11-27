@@ -117,8 +117,9 @@ When capacity reaches 90%, make the capacity percentage box flash red. Make the 
 
 - **Step 1 graph file:** [capacity-validation-step-1.svg](03_output/capacity-validation-step-1.svg)
 - **Step 2 graph file:** [capacity-validation-step-2.svg](03_output/capacity-validation-step-2.svg)
+- **Step 3 graph file:** [capacity-validation-step-3.svg](03_output/capacity-validation-step-3.svg)
 
-All recorded desktop validation results are in this table. The capacity, route, and property values were checked by the independent JavaScript reference validator in `02_validation/validate_desktop.js`. Source checks inspect the Python code and scene assets. Matching Python unit tests in `02_validation/test_desktop.py` and interactive checks remain pending because this environment has no usable Python interpreter.
+All recorded desktop validation results are in this table. The capacity, route, and property values were checked by the independent JavaScript reference validator in `02_validation/validate_desktop.js`; Python unit tests and hidden-window Tkinter checks were also run with Python 3.15.2. Source checks inspect the Python code and scene assets. A separate physical computer was unavailable for a literal cross-computer save transfer.
 
 | Step | Validation check | Expected | Actual | Status |
 |:---:|---|---|---|---|
@@ -135,7 +136,7 @@ All recorded desktop validation results are in this table. The capacity, route, 
 | 1 | Original SVG overlay coordinates | 38.1, 74.5, 56.2, 92.4 px | Coordinates applied in Tkinter drawing | Pass, source comparison |
 | 1 | Interpolation proportionality | 15 samples match straight-line values; 87.5 ft gives 11,000 lb | 15 matched; 87.5 ft gives 11,000 lb | Pass, property |
 | 1 | Left/right trolley symmetry | 4 pairs match; x = 10 and 610 give 90 ft and 10,600 lb | 4 matched; example matches | Pass, property |
-| 1 | Python unit tests and Tkinter visual check | Run desktop code | Could not run here | Pending |
+| 1 | Python and Tkinter scene checks | Run desktop code and inspect full scene | 16 unit tests and 9 Tkinter checks passed; start scene inspected | Pass |
 | **Step 2** | **Gameplay and desktop features** | | | |
 | 2 | Capacity at 50 ft | 20,000 lb | 20,000 lb | Pass, reference |
 | 2 | Capacity at 62.5 ft | 16,500 lb | 16,500 lb | Pass, reference |
@@ -154,9 +155,21 @@ All recorded desktop validation results are in this table. The capacity, route, 
 | 2 | Animated turn symmetry | 5 symmetric progress samples; halfway is edge-on | 5 samples matched | Pass, property |
 | 2 | Gameplay, save/load, graph, timer, layout, and turn source flows | 17 checks | 17 passed | Pass, source inspection |
 | 2 | Backgrounds without the fixed player crane | 25 regenerated PNGs; fixed crane absent | 25 regenerated; 70% image visually inspected | Pass, asset inspection |
-| 2 | Python unit tests and Tkinter visual check | Run desktop code | Could not run here | Pending |
-| 2 | Interactive gameplay and checkpoint transfer | Observe in Tkinter and between computers | Could not run here | Pending for step 3 |
-| 3 | Final acceptance checks and capacity graph | Run after step 3 review | Not started | Pending |
+| 2 | Python and Tkinter gameplay checks | Run desktop code | 16 unit tests and 9 Tkinter checks passed | Pass |
+| 2 | Portable checkpoint in a fresh app instance | Level, time, score, placed target, and beam identity restored | Level 3, 47.5 s, score 410, target 0 with beam 3 restored | Pass, Tkinter |
+| **Step 3** | **Final acceptance review** | | | |
+| 3 | Capacity and challenge cases | 10 numerical cases | 10 passed | Pass, reference |
+| 3 | Beam route feasibility | 315 safe routes across five levels | 315 safe routes | Pass, reference |
+| 3 | Mathematical properties | 15 interpolation, 4 radius symmetry, 8 mirror, 5 turn samples | All 32 matched | Pass, property |
+| 3 | Python unit tests | 16 capacity, checkpoint, and gameplay tests | 16 passed | Pass, Python |
+| 3 | Tkinter acceptance tests | 9 scene, graph, pause, save/load, hazard, failure, and progression checks | 9 passed | Pass, Tkinter |
+| 3 | Live graph with a 3,250 lb beam | Weight marker above 0 lb baseline at y = 70.8125 px; no shift from cable sway | Marker at 70.8125 px; no shift | Pass, Tkinter |
+| 3 | Exact 90% warning and 100% overload | 7,236 lb at 112 ft warns; 5,500 lb at 150 ft reaches limit | Warning and threshold tests passed | Pass, Python and Tkinter |
+| 3 | Worker, automatic crane, bird, and failure motion | Contact penalties, bird sway, worker bounce | All observed in Tkinter checks | Pass |
+| 3 | Five-level placement and high score | Three placements per level; final score 2,500; saved high score 2,500 | Five levels completed; both scores 2,500 | Pass, Tkinter |
+| 3 | Timeout and overload restart paths | Timeout restarts game; overload restarts level | Both paths passed | Pass, Tkinter |
+| 3 | Visual layout review | Full crane base, beams, stats, and graph visible; left-facing crane and turn shown | Four 1480 × 929 px captures inspected | Pass, visual inspection |
+| 3 | Physical checkpoint transfer to another computer | Open the JSON save on a second computer | Fresh Tk instance with separate high-score file passed; physical second computer unavailable | Pending physical check |
 
 Each step includes a property check: the validator checks interpolation at 25%, 50%, and 75% of every chart segment and compares equal trolley distances to the left and right of the mast. Step 2 also checks crane mirroring and turn symmetry. The graphs below show the capacity curve and the 15 interpolation samples for each completed step.
 
@@ -170,7 +183,7 @@ Each step includes a property check: the validator checks interpolation at 25%, 
 - The stats and graph occupy a dedicated bottom row, with smaller stat cards. The entire construction scene chooses the largest image scale that fits the screen height and width. The scene no longer needs scrolling, so the crane bases and beams remain visible together with the graph.
 - A 70% scene image was visually inspected after regenerating the assets; its sky, crane tops, tower, crane bases, and ground all extend to the image edges without cropping.
 - The graph marker, radius and capacity readouts, and overload threshold now use the trolley position. A swaying cable does not shift the graph marker.
-- Python/Tkinter launch and visual GUI inspection: **Pending**. The available `python`, `py`, and `python3` commands are inaccessible Windows app aliases.
+- Python/Tkinter execution and visual GUI inspection passed using the interpreter at `%LOCALAPPDATA%\Python\bin\python.exe`. The plain `python` command still resolves to an inaccessible Windows app alias on this machine.
 
 ### Step 2 — Gameplay and desktop features
 
@@ -178,13 +191,20 @@ Each step includes a property check: the validator checks interpolation at 25%, 
 
 The Tkinter gameplay now includes crane movement and turning, beam pickup and placement, five timed levels, scoring and local high score, worker and automatic crane collisions, bird-triggered sway, pause, failure and restart, portable JSON checkpoints, and the live trolley-radius capacity graph. During this review, the timer was changed to use full elapsed time, scheduled timer and level-transition callbacks were made cancellable, blocked targets were changed to retain the carried beam, and expired or completed checkpoints were rejected. Checkpoints also retain which beam filled each target, so loading regenerates the correct remaining beams; older checkpoint files without that mapping still load. The TIME LEFT card now sits in the header immediately right of “Build above the skyline”; the other six stats stay below the scene in two compact rows beside the graph. The player crane's mast, boom, and counterweight are now drawn as live Canvas items and mirrored around the mast during a 1.6-second eased turn, so the trolley can reach the beam on the left.
 
-`node 02_validation/validate_desktop.js 2` passed the eight capacity cases, 32 property samples, 315 route cases, and 17 source-flow checks recorded in the table above. The route and property checks use an independent JavaScript reference calculation; the gameplay-flow checks inspect Python source and do not execute the Tkinter game. All 25 scene PNGs were regenerated without the fixed player crane; a 70% background was visually inspected to confirm the fixed crane is absent.
+`node 02_validation/validate_desktop.js 2` passed the eight capacity cases, 32 property samples, 315 route cases, and 17 source-flow checks recorded in the table above. The route and property checks use an independent JavaScript reference calculation; separate Python and Tkinter tests execute the desktop game. All 25 scene PNGs were regenerated without the fixed player crane; a 70% background was visually inspected to confirm the fixed crane is absent.
 
 The source-flow checks cover five timers, placement scoring, collision penalties, bird sway, pause-gated saves, checkpoint format and load flow, blocked targets, full elapsed-time countdown, cancellation of pending callbacks, the header timer position, and the animated crane mirror. The graph above shows the checked capacity values and the 15 green interpolation samples; the mirror and turn properties are recorded in the central table because the graph's horizontal axis is load radius. The app draws its own live graph beside the stats.
 
 ### Step 3 — Final review
 
-Pending sequential review. The full acceptance checks and final graph will be recorded after step 3.
+![Step 3 capacity validation graph](03_output/capacity-validation-step-3.svg)
+
+The final reference run, `node 02_validation/validate_desktop.js 3`, passed 10 numerical capacity cases, 315 route cases, and 32 property samples, and wrote the graph above. The actual Python functions passed 16 unit tests. The Tkinter app passed nine hidden-window acceptance tests covering layout, the live graph, exact warning thresholds, pause, a portable checkpoint loaded into a fresh app instance, hazards, worker bounce, failure and restart, and placements through all five levels.
+
+Visual inspection of [the start scene](03_output/desktop-step-3-start.png), [the turn midpoint](03_output/desktop-step-3-turn.png), [the left-facing crane](03_output/desktop-step-3-left.png), and [a carried load with a red graph marker](03_output/desktop-step-3-load.png) confirmed the full scene, crane base, beams, stats, and graph remain visible at the tested 1536 × 864 logical-pixel display size with 125% Windows scaling. The live graph was adjusted to start at 0 lb so light beams are plotted at their actual weights. A small tolerance now makes the exact 90% warning and 100% overload thresholds reliable after floating-point interpolation. Images are owned by their Tk window, so the checkpoint can load in a fresh app instance. Level changes now occur after the completion delay, keeping the scene and level readout consistent.
+
+The save JSON contains no machine-specific path, and a separate Tk window with a separate high-score file loaded it successfully. A physical transfer to another computer remains untested because a second computer is not available here.
+
 ## Out of scope
 
 - This is a simple game for fun, not a real crane simulator, operator training tool, or source of real-world safety guidance.

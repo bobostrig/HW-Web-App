@@ -302,3 +302,9 @@
 - **What you asked:** Make the first two line items under desktop validation results the graph files, labeled for their steps.
 - **What changed:** Added Step 1 and Step 2 SVG file links as the first two items under **Desktop App Validation Results** in `spec.md`. Kept the graph images embedded with their step notes and updated the plan for future graph links.
 - **Whether it worked:** Both linked graph files exist. The single results table remains below the links; no game code or `index.html` changed.
+
+## 68. Complete desktop implementation step 3
+
+- **What you asked:** Continue to step 3: polish the desktop app, run final acceptance checks including a property check, and record the results and graph in `spec.md`.
+- **What changed:** Found a usable Python 3.15 interpreter, ran actual Python and Tkinter checks, and added nine GUI acceptance checks plus four visual captures. Corrected the live graph to start at 0 lb, made exact 90% and 100% capacity thresholds robust to floating-point rounding, assigned scene images to their Tk window for a fresh-instance checkpoint load, and delayed the level number change until the new level starts. Added the Step 3 graph as the third graph-file item and recorded the final results in the single desktop validation table.
+- **Whether it worked:** The final validator passed 10 numerical cases, 315 beam routes, 32 property samples, and 17 source checks; 16 Python unit tests and nine Tkinter acceptance tests passed. Four 1480 × 929 px captures were inspected. A portable checkpoint loaded in a separate Tk instance with a separate high-score file. Physical transfer to another computer remains untested; `index.html` is unchanged.
