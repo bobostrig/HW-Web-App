@@ -1,5 +1,5 @@
 <svg class="scene" width="1440" height="660" viewBox="0 0 1440 660" role="img" aria-labelledby="scene-title scene-desc" xmlns="http://www.w3.org/2000/svg">
-        <style>#player-trolley,#beam-1,#beam-2,#beam-3,#worker-walk,#auto-trolley,#auto-beam,#bird-strike,#crash-overlay,#debris,#target-1,#target-2,#target-3,#target-label-1,#target-label-2,#target-label-3,#tower-bolts{display:none!important}</style><title id="scene-title">Tower crane construction site</title>
+        <style>#player-crane,#beam-1,#beam-2,#beam-3,#worker-walk,#auto-trolley,#auto-beam,#bird-strike,#crash-overlay,#debris,#target-1,#target-2,#target-3,#target-label-1,#target-label-2,#target-label-3,#tower-bolts{display:none!important}</style><title id="scene-title">Tower crane construction site</title>
         <desc id="scene-desc">A player crane and an automatic crane work on a three-level steel tower above a city skyline. Three steel beams await placement.</desc>
         <defs>
           <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#7393a0"/><stop offset=".58" stop-color="#c1b9a7"/><stop offset="1" stop-color="#e0c69e"/></linearGradient>

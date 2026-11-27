@@ -248,3 +248,57 @@
 - **What you asked:** Restore the bottom of the crane and visible beams while keeping the full graph at the bottom; make the stats smaller.
 - **What changed:** Generated scaled versions of the original SVG artwork for each level, made the desktop window choose the largest full-scene size that fits the display, scaled the native overlays with it, removed scene scrolling, and condensed the stat cards to two rows.
 - **Whether it worked:** All 25 image dimensions and source-layout checks pass; the 70% scene image was visually inspected with the complete crane and ground visible. Visual confirmation in Tkinter remains pending because Python cannot be launched in this environment.
+
+## 59. Review desktop implementation step 2
+
+- **What you asked:** Continue to step 2 of the desktop plan, covering gameplay and the two desktop features, then check validations and add the graph to `spec.md`.
+- **What changed:** Reviewed the drafted Tkinter gameplay, fixed timer and level-transition callback handling, made blocked targets keep the carried beam, aligned bird strikes and target placement with the web game, tightened checkpoint validation, preserved the beam-to-target mapping in portable saves while accepting older saves, and added step 2 reference and source-flow checks. Added the step 2 validation results and graph to `spec.md`.
+- **Whether it worked:** The independent reference checks passed eight capacity cases, 315 beam routes, two challenge-beam margins, and twelve source-flow checks. Python/Tkinter unit and interactive tests remain pending because this environment has no accessible Python interpreter. `index.html` remains unchanged.
+
+## 60. Add a property check to every desktop validation step
+
+- **What you asked:** Include a property check, such as symmetry or proportionality, every time desktop validations are run.
+- **What changed:** Added 15 interpolation proportionality samples and four left/right trolley symmetry pairs to the validator for every step. Added matching Python unit tests for the desktop functions, added the proportionality samples to the capacity graphs, and updated the step 1 and step 2 results and future-step rule in `spec.md`.
+- **Whether it worked:** The independent reference validator passed all 19 property samples for both completed steps, and both graphs were regenerated. Python function tests remain pending because this environment cannot launch Python. `index.html` remains unchanged.
+
+## 61. Show property results within each completed check
+
+- **What you asked:** Update the validation checks already completed so each one includes the property check.
+- **What changed:** Moved the proportionality and symmetry results into the individual step 1 and step 2 validation tables in `spec.md`, including concrete expected and actual examples for step 1. The step graphs already show the proportionality samples.
+- **Whether it worked:** Both completed steps now show their own passing property results beside the other validation results. The Python function checks remain pending until Python can run.
+
+## 62. Confirm the status of step 2
+
+- **What you asked:** Whether the rest of desktop implementation step 2 is finished.
+- **What changed:** Rechecked for a usable local Python interpreter in common installation paths, available commands, and the project folders. No implementation files changed.
+- **Whether it worked:** The step 2 code, reference calculations, property checks, and source-flow checks are complete. Python unit tests and interactive Tkinter checks remain unverified because only Windows app aliases for Python are available here.
+
+## 63. Move the desktop timer into the header
+
+- **What you asked:** Put the TIME LEFT box at the top, to the right of “Build above the skyline.”
+- **What changed:** Moved the Tkinter timer card into the header immediately beside the title and arranged the six other stats in two compact rows beside the bottom graph. Added a header-layout check to the step 2 validator and updated `spec.md`.
+- **Whether it worked:** The step 2 reference validator passed 10 numerical cases, 19 property samples, 315 beam routes, and 13 source-flow checks, then regenerated the step 2 graph. Tkinter visual confirmation remains pending without a usable Python interpreter. `index.html` is unchanged.
+
+## 64. Mirror and animate the desktop crane turn
+
+- **What you asked:** Make the player crane flip over the vertical axis so it can reach the left beam, with an animation when it changes sides.
+- **What changed:** Removed the fixed player crane from the desktop background assets, drew its mast, boom, and counterweight as native Canvas items, mirrored them around the mast with a 1.6-second eased turn, moved the trolley with the animated crane, and added guidance when the turn finishes. Regenerated all 25 scene PNGs, added mirror and turn property checks, and updated step 2 validation in `spec.md`.
+- **Whether it worked:** The reference validator passed 315 routes, 32 property samples including left-beam reach and turn symmetry, and 17 source-flow checks. A regenerated background was visually inspected to confirm the fixed crane is gone. The running Tkinter animation remains unverified because Python is unavailable here; `index.html` is unchanged.
+
+## 65. Put desktop validation results in one labeled table
+
+- **What you asked:** Keep the validation results and their table in one place in `spec.md`, labeled “Desktop App Validation Results.”
+- **What changed:** Consolidated the capacity, step 1, and step 2 result tables into one table with a Step column under that exact heading. Kept each completed step's graph below its notes and updated the plan to direct future results into the same table.
+- **Whether it worked:** All recorded expected, actual, pass, and pending results remain visible in one desktop validation table. No game code or `index.html` changed for this documentation update.
+
+## 66. Make the first step's validation easy to find
+
+- **What you asked:** Point out where the first step's validation is, since the second step was visible but the first was not.
+- **What changed:** Grouped step 1 and step 2 rows explicitly inside the single desktop validation table, repeated the shared capacity cases for each step, and placed each graph and a direct link immediately below its step heading in `spec.md`.
+- **Whether it worked:** Step 1 now has a clearly labeled block in the table and an immediately visible graph link. Both graph files exist; `index.html` is unchanged.
+
+## 67. Put the graph files first in validation results
+
+- **What you asked:** Make the first two line items under desktop validation results the graph files, labeled for their steps.
+- **What changed:** Added Step 1 and Step 2 SVG file links as the first two items under **Desktop App Validation Results** in `spec.md`. Kept the graph images embedded with their step notes and updated the plan for future graph links.
+- **Whether it worked:** Both linked graph files exist. The single results table remains below the links; no game code or `index.html` changed.

@@ -54,11 +54,24 @@ def player_scene_y(local_y: float) -> float:
     return 510 + 1.3 * (local_y - 510)
 
 
+def crane_scene_x(local_x: float, visual_scale: float) -> float:
+    """Mirror the player crane around its mast center when scale is -1."""
+    return MAST_PIVOT + (local_x - MAST_PIVOT) * visual_scale
+
+
+def crane_turn_scale(start: int, end: int, progress: float) -> float:
+    """Ease the crane through an edge-on view during a 180-degree turn."""
+    fraction = min(1.0, max(0.0, progress))
+    eased = 0.5 - math.cos(math.pi * fraction) / 2
+    return start + (end - start) * eased
+
+
 def auto_scene_y(local_y: float) -> float:
     return 510 + 1.45 * (local_y - 510)
 
 
-def make_checkpoint(level: int, remaining: float, score: int, placed_targets: set[int]) -> dict:
+def make_checkpoint(level: int, remaining: float, score: int, placed_targets: set[int], placed_beams: dict[int, int] | None = None) -> dict:
+    beam_for_target = placed_beams if placed_beams is not None else {target: target + 1 for target in placed_targets}
     return {
         "format": "high-steel-checkpoint",
         "version": SAVE_VERSION,
@@ -66,10 +79,11 @@ def make_checkpoint(level: int, remaining: float, score: int, placed_targets: se
         "remaining_seconds": round(remaining, 2),
         "score": score,
         "placed_targets": sorted(placed_targets),
+        "placements": [{"target": target, "beam_id": beam_for_target[target]} for target in sorted(placed_targets)],
     }
 
 
-def validate_checkpoint(data: object) -> tuple[int, float, int, set[int]]:
+def validate_checkpoint(data: object) -> tuple[int, float, int, set[int], dict[int, int]]:
     if not isinstance(data, dict) or data.get("format") != "high-steel-checkpoint" or data.get("version") != SAVE_VERSION:
         raise ValueError("This save is not a supported High Steel checkpoint.")
     level = data.get("level")
@@ -80,11 +94,29 @@ def validate_checkpoint(data: object) -> tuple[int, float, int, set[int]]:
         raise ValueError("The saved level is invalid.")
     if not isinstance(score, int) or isinstance(score, bool):
         raise ValueError("The saved score is invalid.")
-    if not isinstance(remaining, (int, float)) or isinstance(remaining, bool) or not 0 <= remaining <= LEVEL_SECONDS[level - 1] or not math.isfinite(remaining):
+    if not isinstance(remaining, (int, float)) or isinstance(remaining, bool) or not 0 < remaining <= LEVEL_SECONDS[level - 1] or not math.isfinite(remaining):
         raise ValueError("The saved timer is invalid.")
-    if not isinstance(targets, list) or any(not isinstance(i, int) or isinstance(i, bool) or i not in (0, 1, 2) for i in targets) or len(set(targets)) != len(targets):
+    if not isinstance(targets, list) or len(targets) >= 3 or any(not isinstance(i, int) or isinstance(i, bool) or i not in (0, 1, 2) for i in targets) or len(set(targets)) != len(targets):
         raise ValueError("The saved target list is invalid.")
-    return level, float(remaining), score, set(targets)
+    placements = data.get("placements")
+    if placements is None:
+        beam_for_target = {target: target + 1 for target in targets}
+    else:
+        if not isinstance(placements, list) or len(placements) != len(targets):
+            raise ValueError("The saved beam placements are invalid.")
+        beam_for_target = {}
+        for placement in placements:
+            if not isinstance(placement, dict):
+                raise ValueError("The saved beam placements are invalid.")
+            target, beam_id = placement.get("target"), placement.get("beam_id")
+            if (not isinstance(target, int) or isinstance(target, bool) or target not in targets
+                    or target in beam_for_target or not isinstance(beam_id, int) or isinstance(beam_id, bool)
+                    or beam_id not in (1, 2, 3)):
+                raise ValueError("The saved beam placements are invalid.")
+            beam_for_target[target] = beam_id
+        if len(set(beam_for_target.values())) != len(beam_for_target):
+            raise ValueError("The saved beam placements are invalid.")
+    return level, float(remaining), score, set(targets), beam_for_target
 
 
 class HighSteelApp:
@@ -122,6 +154,8 @@ class HighSteelApp:
         self.run_elapsed = 0.0
         self.last_tick = time.monotonic()
         self.last_draw = self.last_tick
+        self.tick_after_id: str | None = None
+        self.level_after_id: str | None = None
         self.keys: set[str] = set()
         self.trolley_x = float(TROLLEY_HOME)
         self.hook_y = 333.0
@@ -185,6 +219,15 @@ class HighSteelApp:
                  font=("Segoe UI", 8, "bold")).pack(anchor="w")
         tk.Label(title_box, text="Build above the skyline", fg="#edf4f6", bg="#08131d",
                  font=("Segoe UI", 18, "bold")).pack(anchor="w")
+        self.stat_values: dict[str, tk.Label] = {}
+        timer_card = tk.Frame(header, bg="#142631", highlightbackground="#344953", highlightthickness=1)
+        timer_card.pack(side="left", padx=(16, 0))
+        tk.Label(timer_card, text="TIME LEFT", fg="#9babb5", bg="#142631",
+                 font=("Segoe UI", 7, "bold")).pack(anchor="w", padx=8, pady=(3, 0))
+        timer_value = tk.Label(timer_card, text="02:00", fg="#ffbd62", bg="#142631",
+                               font=("Segoe UI", 14, "bold"))
+        timer_value.pack(anchor="w", padx=8, pady=(0, 3))
+        self.stat_values["timer"] = timer_value
         actions = tk.Frame(header, bg="#08131d")
         actions.pack(side="right", anchor="e")
         self.start_button = self._button(actions, "Start Game", self._start_action, "#f1bd68", "#19252c")
@@ -206,7 +249,7 @@ class HighSteelApp:
                                bg="#7393a0", highlightthickness=0)
         self.scene.grid(row=0, column=0, sticky="nsew")
         percent = round(self.scene_scale * 100)
-        self.background_images = [tk.PhotoImage(file=str(ASSET_DIR / f"scene-level-{level}-{percent}.png")) for level in range(1, 6)]
+        self.background_images = [tk.PhotoImage(master=self.root, file=str(ASSET_DIR / f"scene-level-{level}-{percent}.png")) for level in range(1, 6)]
         self.background_item = self.scene.create_image(0, 0, image=self.background_images[0], anchor="nw", tags=("background",))
         self.scene.create_rectangle(0, 0, self.scene_width, self.scene_height, outline="#344b56", width=1, tags=("frame",))
 
@@ -214,14 +257,13 @@ class HighSteelApp:
         footer.grid(row=2, column=0, sticky="ew", padx=12, pady=(4, 2))
         stats = tk.Frame(footer, bg="#0b1722")
         stats.pack(side="left", fill="x", expand=True)
-        for column in range(4):
+        for column in range(3):
             stats.grid_columnconfigure(column, weight=1)
-        self.stat_values: dict[str, tk.Label] = {}
-        for index, (key, label) in enumerate((("timer", "TIME LEFT"), ("score", "SCORE"), ("high", "HIGH SCORE"),
+        for index, (key, label) in enumerate((("score", "SCORE"), ("high", "HIGH SCORE"),
                            ("level", "LEVEL"), ("radius", "RADIUS"), ("capacity", "LOAD / CAPACITY"),
                            ("beams", "TO PLACE"))):
             card = tk.Frame(stats, bg="#142631", highlightbackground="#344953", highlightthickness=1)
-            card.grid(row=index // 4, column=index % 4, sticky="ew", padx=(0, 3), pady=(0, 3))
+            card.grid(row=index // 3, column=index % 3, sticky="ew", padx=(0, 3), pady=(0, 3))
             tk.Label(card, text=label, fg="#9babb5", bg="#142631", font=("Segoe UI", 7, "bold")).pack(anchor="w", padx=5, pady=(2, 0))
             value = tk.Label(card, text="—", fg="#f5fafb", bg="#142631", font=("Segoe UI", 10, "bold"))
             value.pack(anchor="w", padx=5, pady=(0, 2))
@@ -304,7 +346,12 @@ class HighSteelApp:
         else:
             self.start_game()
 
-    def _begin_level(self, message: str, preserved_targets: set[int] | None = None) -> None:
+    def _begin_level(self, message: str, preserved_targets: set[int] | None = None,
+                     preserved_beams: dict[int, int] | None = None) -> None:
+        self._cancel_tick()
+        if self.level_after_id is not None:
+            self.root.after_cancel(self.level_after_id)
+            self.level_after_id = None
         self.failed = False
         self.finished = False
         self.running = True
@@ -331,10 +378,10 @@ class HighSteelApp:
         self.last_auto_contact = False
         self._spawn_beams()
         self.filled_targets = set(preserved_targets or ())
-        for index in self.filled_targets:
-            if index < len(self.beams):
-                self.beams[index]["state"] = "placed"
-                self.beams[index]["target"] = index
+        beam_for_target = preserved_beams if preserved_beams is not None else {target: target + 1 for target in self.filled_targets}
+        for target, beam_id in beam_for_target.items():
+            self.beams[beam_id - 1]["state"] = "placed"
+            self.beams[beam_id - 1]["target"] = target
         self.pause_button.configure(state="normal", text="Pause")
         self.save_button.configure(state="disabled")
         self.start_button.configure(text="Restart Game", state="normal")
@@ -351,6 +398,7 @@ class HighSteelApp:
         if not self.running or self.failed or self.finished:
             return
         self.paused = not self.paused
+        self._cancel_tick()
         self.keys.clear()
         self.pause_button.configure(text="Resume" if self.paused else "Pause")
         self.save_button.configure(state="normal" if self.paused else "disabled")
@@ -381,7 +429,8 @@ class HighSteelApp:
                                             filetypes=(("High Steel save", "*.json"), ("All files", "*.*")))
         if not path:
             return
-        data = make_checkpoint(self.level, self.remaining, self.score, self.filled_targets)
+        placed_beams = {beam["target"]: beam["id"] for beam in self.beams if beam["state"] == "placed"}
+        data = make_checkpoint(self.level, self.remaining, self.score, self.filled_targets, placed_beams)
         try:
             Path(path).write_text(json.dumps(data, indent=2), encoding="utf-8")
         except OSError as error:
@@ -396,17 +445,24 @@ class HighSteelApp:
             return
         try:
             data = json.loads(Path(path).read_text(encoding="utf-8"))
-            level, remaining, score, targets = validate_checkpoint(data)
+            level, remaining, score, targets, placed_beams = validate_checkpoint(data)
         except (OSError, ValueError, TypeError, json.JSONDecodeError) as error:
             messagebox.showerror("Could not load progress", str(error), parent=self.root)
             return
         self.level, self.score, self.remaining = level, score, remaining
-        self._begin_level(f"Level {level} checkpoint loaded. Remaining beams were regenerated.", targets)
+        self._update_record()
+        self._begin_level(f"Level {level} checkpoint loaded. Remaining beams were regenerated.", targets, placed_beams)
 
     def toggle_beam(self) -> None:
+        if self.turn_started:
+            self._set_message("Wait for the crane to finish turning.")
+            return
         if self.carried is not None:
             beam = self.beams[self.carried]
             target_index = self._target_under_load()
+            if target_index is not None and self._auto_blocks_target(target_index):
+                self._set_message("The automatic crane is blocking this target. Wait for it to move clear.")
+                return
             if target_index is not None and target_index not in self.filled_targets:
                 beam["state"] = "placed"
                 beam["target"] = target_index
@@ -442,20 +498,23 @@ class HighSteelApp:
     def _target_under_load(self) -> int | None:
         layout = TOWER_LAYOUTS[self.level - 1]
         x = self._load_x()
-        y = self.hook_screen_y() + 7
+        y = self.hook_screen_y() + 6.5
         for index in range(3):
             target_y = 510 + 1.5 * (layout["targets"][index] - 510)
-            if index not in self.filled_targets and abs(x - layout["centers"][index]) <= layout["widths"][index] / 2 and abs(y - target_y) < 25:
-                if abs(self.auto_x - layout["centers"][index]) < 95 and abs(self.auto_y - target_y) < 24:
-                    return None
+            if index not in self.filled_targets and abs(x - layout["centers"][index]) <= layout["widths"][index] / 2 and abs(y - target_y) < 18:
                 return index
         return None
+
+    def _auto_blocks_target(self, index: int) -> bool:
+        layout = TOWER_LAYOUTS[self.level - 1]
+        target_y = 510 + 1.5 * (layout["targets"][index] - 510)
+        return abs(self.auto_x - layout["centers"][index]) < 95 and abs(self.auto_y - target_y) < 24
 
     def hook_screen_y(self) -> float:
         return player_scene_y(self.hook_y)
 
     def _load_x(self) -> float:
-        return MAST_PIVOT + (self.trolley_x - MAST_PIVOT) * self.orientation + self._sway_x()
+        return self._screen_trolley_x() + self._sway_x()
 
     def _sway_x(self) -> float:
         elapsed = time.monotonic() - self.sway_started
@@ -464,12 +523,14 @@ class HighSteelApp:
         return self.sway_direction * 112 * math.exp(-0.48 * elapsed) * math.sin(8.2 * elapsed)
 
     def _tick(self) -> None:
+        self.tick_after_id = None
         if not self.running or self.paused or self.failed or self.finished:
             return
         now = time.monotonic()
-        dt = min(now - self.last_tick, 0.05)
+        frame_delta = max(0.0, now - self.last_tick)
+        dt = min(frame_delta, 0.05)
         self.last_tick = now
-        self.remaining = max(0.0, self.remaining - dt)
+        self.remaining = max(0.0, self.remaining - frame_delta)
         if self.remaining <= 0:
             self._fail("TIME EXPIRED")
             return
@@ -480,6 +541,8 @@ class HighSteelApp:
             if progress >= 1:
                 self.orientation = self.turn_to
                 self.turn_started = 0.0
+                self._set_message("Crane turned to the left side. Keep moving left to reach the beam." if self.orientation == -1
+                                  else "Crane turned back to the right side.")
         elif horizontal:
             should_turn = (self.orientation == 1 and horizontal < 0 and self.trolley_x <= MAST_PIVOT) or (self.orientation == -1 and horizontal > 0 and self.trolley_x <= MAST_PIVOT)
             if should_turn:
@@ -501,7 +564,12 @@ class HighSteelApp:
             self._draw_graph()
             self._update_hud()
             self.last_draw = now
-        self.root.after(16, self._tick)
+        self.tick_after_id = self.root.after(16, self._tick)
+
+    def _cancel_tick(self) -> None:
+        if self.tick_after_id is not None:
+            self.root.after_cancel(self.tick_after_id)
+            self.tick_after_id = None
 
     def _animate_hazards(self, now: float, dt: float) -> None:
         self.run_elapsed += dt
@@ -522,7 +590,7 @@ class HighSteelApp:
         self.bird_x = -80 + (elapsed % bird_duration) / bird_duration * 1600
         self.bird_y = (140, 170, 200, 230, 260, 275)[bird_cycle % 6]
         cable_top = 1.3 * 175 - 153
-        if bird_cycle != self.last_bird_cycle and abs(self.bird_x + 20 - self._load_x()) < 22 and cable_top <= self.bird_y <= self.hook_screen_y():
+        if bird_cycle != self.last_bird_cycle and abs(self.bird_x + 20 - self._screen_trolley_x()) < 22 and cable_top <= self.bird_y <= self.hook_screen_y():
             self.last_bird_cycle = bird_cycle
             self.sway_started = now
             self.sway_direction = random.choice((-1, 1))
@@ -555,6 +623,7 @@ class HighSteelApp:
             self._persist_high_score()
 
     def _complete_level(self) -> None:
+        self._cancel_tick()
         self.running = False
         self.score += 200
         self._update_record()
@@ -570,11 +639,15 @@ class HighSteelApp:
             self._scale_scene_items("overlay")
         else:
             self._set_message(f"Level {self.level} complete. +200 bonus. Starting level {self.level + 1}.")
-            self.level += 1
-            self.remaining = float(LEVEL_SECONDS[self.level - 1])
-            self.root.after(900, lambda: self._begin_level(f"Level {self.level} started with a new tower layout."))
+            self.level_after_id = self.root.after(900, self._advance_level)
+
+    def _advance_level(self) -> None:
+        self.level_after_id = None
+        self.level += 1
+        self._begin_level(f"Level {self.level} started with a new tower layout.")
 
     def _fail(self, cause: str) -> None:
+        self._cancel_tick()
         self.running = False
         self.failed = True
         self.failure_cause = cause
@@ -668,6 +741,7 @@ class HighSteelApp:
 
     def _draw_scene(self) -> None:
         self.scene.delete("dynamic")
+        self._draw_player_crane()
         self._draw_targets()
         # Player trolley and hoist: same geometry and warm steel colors as index.html.
         x = self._load_x()
@@ -704,8 +778,50 @@ class HighSteelApp:
             self._draw_pause_overlay()
         self._scale_scene_items("dynamic")
 
+    def _visual_crane_scale(self) -> float:
+        if not self.turn_started:
+            return float(self.orientation)
+        progress = (time.monotonic() - self.turn_started) / 1.6
+        return crane_turn_scale(self.turn_from, self.turn_to, progress)
+
     def _screen_trolley_x(self) -> float:
-        return MAST_PIVOT + (self.trolley_x - MAST_PIVOT) * self.orientation
+        return crane_scene_x(self.trolley_x, self._visual_crane_scale())
+
+    def _draw_player_crane(self) -> None:
+        visual_scale = self._visual_crane_scale()
+
+        def line(points: tuple[float, ...], color: str, width: int) -> None:
+            coordinates = []
+            for x, y in zip(points[::2], points[1::2]):
+                coordinates.extend((crane_scene_x(x, visual_scale), player_scene_y(y)))
+            self.scene.create_line(*coordinates, fill=color, width=width, tags=("dynamic", "player-crane"))
+
+        def rectangle(x1: float, y1: float, x2: float, y2: float,
+                      fill: str, outline: str, width: int) -> None:
+            left = crane_scene_x(x1, visual_scale)
+            right = crane_scene_x(x2, visual_scale)
+            self.scene.create_rectangle(min(left, right), player_scene_y(y1),
+                                        max(left, right), player_scene_y(y2),
+                                        fill=fill, outline=outline, width=width, tags=("dynamic", "player-crane"))
+
+        # Recreate the SVG mast and boom as Canvas items so the whole crane can turn.
+        for x in (286, 334):
+            line((x, 510, x, 168), "#354951", 9)
+        for y in (470, 422, 374, 326, 278, 230):
+            line((286, y, 334, y), "#8a9998", 5)
+        for lower, upper in ((470, 422), (374, 326), (278, 230)):
+            line((286, lower, 334, upper), "#526870", 3)
+            line((286, upper, 334, lower), "#526870", 3)
+
+        line((221, 156, 817, 156), "#f3c676", 5)
+        line((221, 175, 810, 175), "#b47a36", 5)
+        for bottom_x in (810, 748, 686, 624, 562, 500, 438, 376, 314, 252):
+            line((bottom_x, 175, bottom_x - 20, 156), "#c8954e", 4)
+        line((335, 160, 787, 160), "#785d37", 2)
+
+        rectangle(190, 130, 229, 175, "#66594a", "#3c4140", 4)
+        for y in (138, 154, 170):
+            line((195, y, 224, y), "#b49a6a", 2)
 
     def trolley_radius(self) -> float:
         return scene_radius(self._screen_trolley_x())
@@ -738,7 +854,7 @@ class HighSteelApp:
             if index in self.filled_targets:
                 color, dash, stroke = "#79d7ac", "", 4
             elif self.carried is not None and self._target_under_load() == index:
-                color, dash, stroke = "#ffe19b", "", 5
+                color, dash, stroke = ("#ff8b70" if self._auto_blocks_target(index) else "#ffe19b"), "", 5
             else:
                 color, dash, stroke = "#77d9df", "7 6", 3
             self.scene.create_rectangle(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
@@ -788,9 +904,12 @@ class HighSteelApp:
         canvas.delete("all")
         width, height = 340, 112
         left, right, top, bottom = 40, 329, 8, 83
+
+        def graph_y(lbs: float) -> float:
+            return bottom - max(0.0, min(20000.0, lbs)) / 20000.0 * (bottom - top)
         canvas.create_rectangle(left, top, right, bottom, outline="#435b67")
-        for capacity in (5000, 10000, 15000, 20000):
-            y = bottom - (capacity - 5000) / 15000 * (bottom - top)
+        for capacity in (0, 5000, 10000, 15000, 20000):
+            y = graph_y(capacity)
             canvas.create_line(left, y, right, y, fill="#263d48")
             canvas.create_text(left - 5, y, text=f"{capacity // 1000}k", anchor="e", fill="#9babb5", font=("Segoe UI", 7))
         for radius in (0, 50, 100, 150):
@@ -800,17 +919,17 @@ class HighSteelApp:
         points = []
         for radius, capacity in CAPACITY_CHART:
             x = left + radius / 150 * (right - left)
-            y = bottom - (capacity - 5000) / 15000 * (bottom - top)
+            y = graph_y(capacity)
             points.extend((x, y))
         canvas.create_line(*points, fill="#77d9df", width=2)
         radius = self.trolley_radius()
         capacity = capacity_at_radius(radius)
         x = left + radius / 150 * (right - left)
-        cap_y = bottom - (capacity - 5000) / 15000 * (bottom - top)
+        cap_y = graph_y(capacity)
         canvas.create_line(x, top, x, bottom, fill="#ffd987", dash=(3, 3))
         if self.carried is not None:
             weight = self.beams[self.carried]["weight"]
-            load_y = bottom - (max(5000, min(20000, weight)) - 5000) / 15000 * (bottom - top)
+            load_y = graph_y(weight)
             color = "#ff5e59" if weight / capacity >= 0.9 else "#ffd987"
             canvas.create_line(left, load_y, x, load_y, fill=color, dash=(4, 3))
             canvas.create_oval(x - 4, load_y - 4, x + 4, load_y + 4, fill=color, outline="#fff")
@@ -843,6 +962,10 @@ class HighSteelApp:
         if self.running and not self.paused:
             if not messagebox.askyesno("Exit High Steel", "Exit without saving this level?", parent=self.root):
                 return
+        self._cancel_tick()
+        if self.level_after_id is not None:
+            self.root.after_cancel(self.level_after_id)
+            self.level_after_id = None
         self.root.destroy()
 
 

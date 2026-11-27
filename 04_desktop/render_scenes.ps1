@@ -10,7 +10,7 @@ $end = $html.IndexOf('</svg>', $start) + 6
 if ($start -lt 0 -or $end -lt 6) { throw 'Could not locate the source SVG scene in index.html.' }
 $source = $html.Substring($start, $end - $start)
 $source = $source.Replace('<svg class="scene"', '<svg class="scene" width="1440" height="660"')
-$style = '<style>#player-trolley,#beam-1,#beam-2,#beam-3,#worker-walk,#auto-trolley,#auto-beam,#bird-strike,#crash-overlay,#debris,#target-1,#target-2,#target-3,#target-label-1,#target-label-2,#target-label-3,#tower-bolts{display:none!important}</style>'
+$style = '<style>#player-crane,#beam-1,#beam-2,#beam-3,#worker-walk,#auto-trolley,#auto-beam,#bird-strike,#crash-overlay,#debris,#target-1,#target-2,#target-3,#target-label-1,#target-label-2,#target-label-3,#tower-bolts{display:none!important}</style>'
 $source = $source.Replace('<title id="scene-title">', "$style<title id=`"scene-title`">")
 $layouts = @(
     @{ Rows = @(458, 376, 294, 261) },
