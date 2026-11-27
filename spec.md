@@ -158,6 +158,8 @@ All recorded desktop validation results are in this table. The capacity, route, 
 | 2 | Python and Tkinter gameplay checks | Run desktop code | 16 unit tests and 9 Tkinter checks passed | Pass |
 | 2 | Portable checkpoint in a fresh app instance | Level, time, score, placed target, and beam identity restored | Level 3, 47.5 s, score 410, target 0 with beam 3 restored | Pass, Tkinter |
 | **Step 3** | **Final acceptance review** | | | |
+| 3 | Validation rerun on November 26, 2026 | 10 numerical cases, 315 routes, 32 property samples, 17 source checks, 16 Python unit tests, and 9 Tkinter acceptance tests | All passed; Step 3 graph regenerated | Pass |
+| 3 | Desktop and web launch commands | `python app.py` runs the desktop app; `python web.py` serves the original `index.html` | Root launcher targets `04_desktop/app.py`; local HTTP request returned the exact `index.html` bytes; 16 unit and 9 Tkinter checks passed | Pass |
 | 3 | Capacity and challenge cases | 10 numerical cases | 10 passed | Pass, reference |
 | 3 | Beam route feasibility | 315 safe routes across five levels | 315 safe routes | Pass, reference |
 | 3 | Mathematical properties | 15 interpolation, 4 radius symmetry, 8 mirror, 5 turn samples | All 32 matched | Pass, property |
@@ -199,7 +201,7 @@ The source-flow checks cover five timers, placement scoring, collision penalties
 
 ![Step 3 capacity validation graph](03_output/capacity-validation-step-3.svg)
 
-The final reference run, `node 02_validation/validate_desktop.js 3`, passed 10 numerical capacity cases, 315 route cases, and 32 property samples, and wrote the graph above. The actual Python functions passed 16 unit tests. The Tkinter app passed nine hidden-window acceptance tests covering layout, the live graph, exact warning thresholds, pause, a portable checkpoint loaded into a fresh app instance, hazards, worker bounce, failure and restart, and placements through all five levels.
+On November 26, 2026, `node 02_validation/validate_desktop.js 3` was rerun and passed 10 numerical capacity cases, 315 route cases, 32 property samples, and 17 source checks; it regenerated the graph above. The actual Python functions passed all 16 unit tests. The Tkinter app passed all nine hidden-window acceptance tests covering layout, the live graph, exact warning thresholds, pause, a portable checkpoint loaded into a fresh app instance, hazards, worker bounce, failure and restart, and placements through all five levels.
 
 Visual inspection of [the start scene](03_output/desktop-step-3-start.png), [the turn midpoint](03_output/desktop-step-3-turn.png), [the left-facing crane](03_output/desktop-step-3-left.png), and [a carried load with a red graph marker](03_output/desktop-step-3-load.png) confirmed the full scene, crane base, beams, stats, and graph remain visible at the tested 1536 × 864 logical-pixel display size with 125% Windows scaling. The live graph was adjusted to start at 0 lb so light beams are plotted at their actual weights. A small tolerance now makes the exact 90% warning and 100% overload thresholds reliable after floating-point interpolation. Images are owned by their Tk window, so the checkpoint can load in a fresh app instance. Level changes now occur after the completion delay, keeping the scene and level readout consistent.
 
@@ -227,8 +229,8 @@ The save JSON contains no machine-specific path, and a separate Tk window with a
 
 ## Platform
 
-- The web app remains available at the project root as `index.html`.
-- The desktop version is a separate native Python Tkinter app in `04_desktop/`; run it from the project root with `python 04_desktop/app.py`.
+- The web app remains available at the project root as `index.html`; run it from the project root with `python web.py` to open it in a browser.
+- The desktop version is a separate native Python Tkinter app in `04_desktop/`; run it from the project root with `python app.py`.
 - Python 3.10 or later with Tkinter is required. Desktop high score is saved locally on that computer and is separate from portable game checkpoints.
 
 ## Desktop Features

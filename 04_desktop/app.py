@@ -1,6 +1,6 @@
 """Native Tkinter desktop version of High Steel.
 
-Run from the project root with: python 04_desktop/app.py
+Run from the project root with: python app.py
 The fixed construction-site artwork is rendered from the SVG scene in index.html;
 all interactive pieces and the live graph are drawn natively on Tkinter canvases.
 """

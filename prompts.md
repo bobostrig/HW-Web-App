@@ -308,3 +308,21 @@
 - **What you asked:** Continue to step 3: polish the desktop app, run final acceptance checks including a property check, and record the results and graph in `spec.md`.
 - **What changed:** Found a usable Python 3.15 interpreter, ran actual Python and Tkinter checks, and added nine GUI acceptance checks plus four visual captures. Corrected the live graph to start at 0 lb, made exact 90% and 100% capacity thresholds robust to floating-point rounding, assigned scene images to their Tk window for a fresh-instance checkpoint load, and delayed the level number change until the new level starts. Added the Step 3 graph as the third graph-file item and recorded the final results in the single desktop validation table.
 - **Whether it worked:** The final validator passed 10 numerical cases, 315 beam routes, 32 property samples, and 17 source checks; 16 Python unit tests and nine Tkinter acceptance tests passed. Four 1480 × 929 px captures were inspected. A portable checkpoint loaded in a separate Tk instance with a separate high-score file. Physical transfer to another computer remains untested; `index.html` is unchanged.
+
+## 69. Rerun desktop validation and record the results
+
+- **What you asked:** Run the validation again and put the results in `spec.md`.
+- **What changed:** Reran the Step 3 reference validator, Python unit tests, and hidden-window Tkinter acceptance checks. Added a dated rerun row to the single Desktop App Validation Results table in `spec.md` and updated the Step 3 review notes.
+- **Whether it worked:** All 10 numerical cases, 315 routes, 32 property samples, 17 source checks, 16 Python unit tests, and nine Tkinter acceptance tests passed. The Step 3 graph was regenerated. Physical transfer to a second computer remains untested; `index.html` was not changed.
+
+## 70. Give the desktop and web apps separate launch commands
+
+- **What you asked:** Let someone start the desktop app with `python app.py` and give the web app a different command.
+- **What changed:** Added root `app.py` to launch the existing Tkinter code and root `web.py` to serve and open `index.html`. Updated the launch instructions and recorded the validation in `spec.md`.
+- **Whether it worked:** The desktop launcher targeted `04_desktop/app.py`; the local web server returned the exact unchanged `index.html`. The Step 3 reference validator, 16 Python unit tests, and nine Tkinter acceptance checks passed.
+
+## 71. Add a GitHub README with eight sections
+
+- **What you asked:** Create the approved root README with eight separate sections, keeping the description and screenshots apart and matching at least five workflow steps to real commits.
+- **What changed:** Added `README.md` with Description, Screenshots, How to run, Controls, Features, Validation, Development workflow, and Project layout sections. The workflow table maps all six web steps and all three desktop steps to existing Git commits.
+- **Whether it worked:** The README uses tracked screenshot and graph files, documents the separate launch commands, and links to the consolidated validation results in `spec.md`. Its paths and commit references were checked; `index.html` was not changed.

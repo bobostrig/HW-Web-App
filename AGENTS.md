@@ -1,6 +1,6 @@
 # Project layout
 
-This project contains a single-file web app and a native Python desktop app. Keep `AGENTS.md`, `spec.md`, `prompts.md`, and `index.html` at the project root. `index.html` must stay at the root for GitHub Pages and must remain available as the web app.
+This project contains a single-file web app and a native Python desktop app. Keep `AGENTS.md`, `spec.md`, `prompts.md`, `index.html`, `app.py`, and `web.py` at the project root. `index.html` must stay at the root for GitHub Pages and must remain available as the web app. Run the desktop version with `python app.py` and the web version with `python web.py`.
 
 - `00_planning/`: notes and sketches
 - `01_data/`: data files
