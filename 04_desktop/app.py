@@ -34,6 +34,7 @@ TOWER_LAYOUTS = (
 )
 BEAM_SPAWN_RANGES = ((155, 205), (360, 470), (520, 660))
 SAVE_VERSION = 1
+SCENE_SCALES = (1.0, 0.9, 0.8, 0.7, 0.6)
 
 
 def capacity_at_radius(radius: float) -> float:
@@ -47,6 +48,14 @@ def capacity_at_radius(radius: float) -> float:
 
 def scene_radius(screen_x: float) -> float:
     return min(150.0, abs(float(screen_x) - MAST_PIVOT) * 150.0 / 500.0)
+
+
+def player_scene_y(local_y: float) -> float:
+    return 510 + 1.3 * (local_y - 510)
+
+
+def auto_scene_y(local_y: float) -> float:
+    return 510 + 1.45 * (local_y - 510)
 
 
 def make_checkpoint(level: int, remaining: float, score: int, placed_targets: set[int]) -> dict:
@@ -83,8 +92,19 @@ class HighSteelApp:
         self.root = root
         self.root.title("High Steel | Tower Crane Challenge")
         self.root.configure(bg="#08131d")
-        self.root.geometry("1490x915")
-        self.root.minsize(1240, 780)
+        available_width = root.winfo_screenwidth() - 32
+        available_height = root.winfo_screenheight() - 72
+        self.scene_scale = next((scale for scale in SCENE_SCALES
+                                 if SCENE_WIDTH * scale + 32 <= available_width
+                                 and SCENE_HEIGHT * scale + 215 <= available_height), 0.6)
+        self.scene_width = round(SCENE_WIDTH * self.scene_scale)
+        self.scene_height = round(SCENE_HEIGHT * self.scene_scale)
+        window_width = min(available_width, max(900, self.scene_width + 32))
+        window_height = min(available_height, self.scene_height + 215)
+        self.root.geometry(f"{window_width}x{window_height}")
+        self.root.minsize(window_width, window_height)
+        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_rowconfigure(1, weight=1)
         self.root.protocol("WM_DELETE_WINDOW", self.close)
 
         self.high_score_path = self._high_score_path()
@@ -158,13 +178,13 @@ class HighSteelApp:
 
     def _build_ui(self) -> None:
         header = tk.Frame(self.root, bg="#08131d")
-        header.pack(fill="x", padx=18, pady=(12, 8))
+        header.grid(row=0, column=0, sticky="ew", padx=12, pady=(6, 4))
         title_box = tk.Frame(header, bg="#08131d")
         title_box.pack(side="left")
         tk.Label(title_box, text="HIGH STEEL · CRANE CHALLENGE", fg="#77d9df", bg="#08131d",
-                 font=("Segoe UI", 9, "bold")).pack(anchor="w")
+                 font=("Segoe UI", 8, "bold")).pack(anchor="w")
         tk.Label(title_box, text="Build above the skyline", fg="#edf4f6", bg="#08131d",
-                 font=("Segoe UI", 22, "bold")).pack(anchor="w")
+                 font=("Segoe UI", 18, "bold")).pack(anchor="w")
         actions = tk.Frame(header, bg="#08131d")
         actions.pack(side="right", anchor="e")
         self.start_button = self._button(actions, "Start Game", self._start_action, "#f1bd68", "#19252c")
@@ -179,44 +199,49 @@ class HighSteelApp:
         self.load_button.pack(side="left", padx=3)
 
         scene_border = tk.Frame(self.root, bg="#263a45", padx=1, pady=1)
-        scene_border.pack(padx=14, fill="both", expand=True)
-        self.scene = tk.Canvas(scene_border, width=SCENE_WIDTH, height=SCENE_HEIGHT,
+        scene_border.grid(row=1, column=0, sticky="nsew", padx=12)
+        scene_border.grid_rowconfigure(0, weight=1)
+        scene_border.grid_columnconfigure(0, weight=1)
+        self.scene = tk.Canvas(scene_border, width=self.scene_width, height=self.scene_height,
                                bg="#7393a0", highlightthickness=0)
-        self.scene.pack(fill="both", expand=True)
-        self.background_images = [tk.PhotoImage(file=str(ASSET_DIR / f"scene-level-{level}.png")) for level in range(1, 6)]
+        self.scene.grid(row=0, column=0, sticky="nsew")
+        percent = round(self.scene_scale * 100)
+        self.background_images = [tk.PhotoImage(file=str(ASSET_DIR / f"scene-level-{level}-{percent}.png")) for level in range(1, 6)]
         self.background_item = self.scene.create_image(0, 0, image=self.background_images[0], anchor="nw", tags=("background",))
-        self.scene.create_rectangle(0, 0, SCENE_WIDTH, SCENE_HEIGHT, outline="#344b56", width=1, tags=("frame",))
+        self.scene.create_rectangle(0, 0, self.scene_width, self.scene_height, outline="#344b56", width=1, tags=("frame",))
 
         footer = tk.Frame(self.root, bg="#0b1722")
-        footer.pack(fill="x", padx=14, pady=(8, 13))
+        footer.grid(row=2, column=0, sticky="ew", padx=12, pady=(4, 2))
         stats = tk.Frame(footer, bg="#0b1722")
         stats.pack(side="left", fill="x", expand=True)
+        for column in range(4):
+            stats.grid_columnconfigure(column, weight=1)
         self.stat_values: dict[str, tk.Label] = {}
-        for key, label in (("timer", "TIME LEFT"), ("score", "SCORE"), ("high", "HIGH SCORE"),
+        for index, (key, label) in enumerate((("timer", "TIME LEFT"), ("score", "SCORE"), ("high", "HIGH SCORE"),
                            ("level", "LEVEL"), ("radius", "RADIUS"), ("capacity", "LOAD / CAPACITY"),
-                           ("beams", "TO PLACE")):
+                           ("beams", "TO PLACE"))):
             card = tk.Frame(stats, bg="#142631", highlightbackground="#344953", highlightthickness=1)
-            card.pack(side="left", padx=(0, 4), fill="y")
-            tk.Label(card, text=label, fg="#9babb5", bg="#142631", font=("Segoe UI", 7, "bold")).pack(anchor="w", padx=7, pady=(5, 0))
-            value = tk.Label(card, text="—", fg="#f5fafb", bg="#142631", font=("Segoe UI", 11, "bold"))
-            value.pack(anchor="w", padx=7, pady=(1, 5))
+            card.grid(row=index // 4, column=index % 4, sticky="ew", padx=(0, 3), pady=(0, 3))
+            tk.Label(card, text=label, fg="#9babb5", bg="#142631", font=("Segoe UI", 7, "bold")).pack(anchor="w", padx=5, pady=(2, 0))
+            value = tk.Label(card, text="—", fg="#f5fafb", bg="#142631", font=("Segoe UI", 10, "bold"))
+            value.pack(anchor="w", padx=5, pady=(0, 2))
             self.stat_values[key] = value
 
         graph_wrap = tk.Frame(footer, bg="#142631", highlightbackground="#344953", highlightthickness=1)
         graph_wrap.pack(side="right", padx=(8, 0))
         graph_head = tk.Frame(graph_wrap, bg="#142631")
-        graph_head.pack(fill="x", padx=8, pady=(4, 0))
-        tk.Label(graph_head, text="LIVE LOAD ON CAPACITY CURVE", fg="#dce8eb", bg="#142631",
+        graph_head.pack(fill="x", padx=8, pady=(2, 0))
+        tk.Label(graph_head, text="CAPACITY CURVE", fg="#dce8eb", bg="#142631",
                  font=("Segoe UI", 8, "bold")).pack(side="left")
         self.graph_note = tk.Label(graph_head, text="No beam carried", fg="#9babb5", bg="#142631",
                                    font=("Segoe UI", 8))
         self.graph_note.pack(side="right")
         self.graph = tk.Canvas(graph_wrap, width=340, height=112, bg="#101e29", highlightthickness=0)
-        self.graph.pack(padx=7, pady=(3, 7))
+        self.graph.pack(padx=7, pady=(2, 3))
 
         self.status_var = tk.StringVar(value=self.message)
         tk.Label(self.root, textvariable=self.status_var, anchor="w", fg="#9babb5", bg="#08131d",
-                 font=("Segoe UI", 9)).pack(fill="x", padx=18, pady=(0, 8))
+                 font=("Segoe UI", 8)).grid(row=3, column=0, sticky="ew", padx=12, pady=(0, 3))
 
     @staticmethod
     def _button(parent: tk.Widget, text: str, command, bg: str = "#182c37", fg: str = "#edf4f6") -> tk.Button:
@@ -427,7 +452,7 @@ class HighSteelApp:
         return None
 
     def hook_screen_y(self) -> float:
-        return 510 + 1.3 * (self.hook_y - 510)
+        return player_scene_y(self.hook_y)
 
     def _load_x(self) -> float:
         return MAST_PIVOT + (self.trolley_x - MAST_PIVOT) * self.orientation + self._sway_x()
@@ -467,7 +492,7 @@ class HighSteelApp:
         if vertical:
             self.hook_y = max(175.0, min(490.0, self.hook_y + vertical * 115 * dt))
         self._animate_hazards(now, dt)
-        radius = scene_radius(self._load_x())
+        radius = self.trolley_radius()
         if self.carried is not None and self.beams[self.carried]["weight"] >= capacity_at_radius(radius):
             self._fail("LOAD LIMIT EXCEEDED")
             return
@@ -542,6 +567,7 @@ class HighSteelApp:
             self.scene.create_text(720, 285, text="CONSTRUCTION FINISHED", fill="#ffd987", font=("Segoe UI", 19, "bold"), tags=("overlay",))
             self.scene.create_text(720, 340, text="GAME COMPLETE", fill="#fff6e7", font=("Segoe UI", 36, "bold"), tags=("overlay",))
             self.scene.create_text(720, 385, text=f"Final score: {self.score:,}", fill="#d2dfe4", font=("Segoe UI", 17), tags=("overlay",))
+            self._scale_scene_items("overlay")
         else:
             self._set_message(f"Level {self.level} complete. +200 bonus. Starting level {self.level + 1}.")
             self.level += 1
@@ -573,6 +599,9 @@ class HighSteelApp:
         self.failure_worker_items = worker_items
         self.failure_cause = cause
         self.start_button.configure(text="Restart Game" if cause == "TIME EXPIRED" else "Restart Level")
+        self._scale_scene_items("overlay")
+        self._scale_scene_items("collapse")
+        self._scale_scene_items("collapse-worker")
         self._animate_failure()
 
     def _create_failure_worker(self) -> list[int]:
@@ -592,7 +621,7 @@ class HighSteelApp:
         for (item, x1, y1, x2, y2), (vx, vy) in zip(self.failure_pieces, self.failure_velocities):
             dx = vx * elapsed
             dy = vy * elapsed + 95 * elapsed * elapsed
-            self.scene.coords(item, x1 + dx, y1 + dy, x2 + dx, y2 + dy)
+            self.scene.coords(item, *((value * self.scene_scale) for value in (x1 + dx, y1 + dy, x2 + dx, y2 + dy)))
         if elapsed < 0.75:
             worker_y = 280 + 180 * (elapsed / 0.75) ** 2
         elif elapsed < 1.0:
@@ -610,17 +639,22 @@ class HighSteelApp:
             (x + 2, y + 27, x + 11, y + 44),
         )
         for item, coords in zip(self.failure_worker_items, coordinates):
-            self.scene.coords(item, *coords)
+            self.scene.coords(item, *((value * self.scene_scale) for value in coords))
         if elapsed < 1.85:
             self.root.after(33, self._animate_failure)
         else:
-            self.scene.create_text(720, 285, text=self.failure_cause, fill="#ff766d", font=("Segoe UI", 19, "bold"), tags=("overlay",))
-            self.scene.create_text(720, 335, text="LEVEL FAILED", fill="#fff6e7", font=("Segoe UI", 34, "bold"), tags=("overlay",))
+            self.scene.create_text(720, 285, text=self.failure_cause, fill="#ff766d", font=("Segoe UI", 19, "bold"), tags=("overlay", "failure-title"))
+            self.scene.create_text(720, 335, text="LEVEL FAILED", fill="#fff6e7", font=("Segoe UI", 34, "bold"), tags=("overlay", "failure-title"))
+            self._scale_scene_items("failure-title")
+
+    def _scale_scene_items(self, tag: str) -> None:
+        self.scene.scale(tag, 0, 0, self.scene_scale, self.scene_scale)
 
     def _draw_pause_overlay(self) -> None:
         self.scene.delete("overlay")
         self.scene.create_rectangle(0, 0, SCENE_WIDTH, SCENE_HEIGHT, fill="#08131d", stipple="gray50", outline="", tags=("overlay",))
         self.scene.create_text(720, 300, text="PAUSED", fill="#fff6e7", font=("Segoe UI", 42, "bold"), tags=("overlay",))
+        self._scale_scene_items("overlay")
 
     def _draw_start_overlay(self) -> None:
         self.scene.delete("overlay")
@@ -630,6 +664,7 @@ class HighSteelApp:
                                fill="#d2dfe4", font=("Segoe UI", 15), tags=("overlay",))
         self.scene.create_text(720, 365, text="Arrow keys or WASD move · Space picks up or releases · Pause to save a checkpoint",
                                fill="#d2dfe4", font=("Segoe UI", 11), tags=("overlay",))
+        self._scale_scene_items("overlay")
 
     def _draw_scene(self) -> None:
         self.scene.delete("dynamic")
@@ -637,15 +672,15 @@ class HighSteelApp:
         # Player trolley and hoist: same geometry and warm steel colors as index.html.
         x = self._load_x()
         trolley_x = self._screen_trolley_x()
-        self.scene.create_line(trolley_x, 175, x, self.hook_screen_y(), fill="#273943", width=3, tags="dynamic")
-        self.scene.create_rectangle(trolley_x - 21, 147, trolley_x + 21, 175, fill="#efbd66", outline="#725834", width=3, tags="dynamic")
-        self.scene.create_rectangle(trolley_x - 16, 153, trolley_x + 16, 158, fill="#ffe1a0", outline="", tags="dynamic")
+        self.scene.create_line(trolley_x, player_scene_y(175), x, self.hook_screen_y(), fill="#273943", width=3, tags="dynamic")
+        self.scene.create_rectangle(trolley_x - 21, player_scene_y(147), trolley_x + 21, player_scene_y(175), fill="#efbd66", outline="#725834", width=3, tags="dynamic")
+        self.scene.create_rectangle(trolley_x - 16, player_scene_y(153), trolley_x + 16, player_scene_y(158), fill="#ffe1a0", outline="", tags="dynamic")
         for wheel_x in (trolley_x - 13, trolley_x + 13):
-            self.scene.create_oval(wheel_x - 4, 173, wheel_x + 4, 181, fill="#705c3b", outline="", tags="dynamic")
-        self.scene.create_oval(trolley_x - 5, 163, trolley_x + 5, 173, fill="#ffdf91", outline="", tags="dynamic")
+            self.scene.create_oval(wheel_x - 4, player_scene_y(172), wheel_x + 4, player_scene_y(182), fill="#705c3b", outline="", tags="dynamic")
+        self.scene.create_oval(trolley_x - 5, player_scene_y(163), trolley_x + 5, player_scene_y(173), fill="#ffdf91", outline="", tags="dynamic")
         hy = self.hook_screen_y()
-        self.scene.create_rectangle(x - 9, hy - 7, x + 9, hy + 11, fill="#a8b2ae", outline="#394951", width=2, tags="dynamic")
-        self.scene.create_rectangle(x - 12, hy + 10, x + 12, hy + 20, fill="#56686e", outline="#394951", width=1, tags="dynamic")
+        self.scene.create_rectangle(x - 9, hy - 2, x + 9, hy + 22, fill="#a8b2ae", outline="#394951", width=2, tags="dynamic")
+        self.scene.create_rectangle(x - 12, hy + 24, x + 12, hy + 40, fill="#56686e", outline="#394951", width=1, tags="dynamic")
 
         for index, beam in enumerate(self.beams):
             if beam["state"] == "ground":
@@ -667,11 +702,18 @@ class HighSteelApp:
                                    font=("Segoe UI", 54, "bold"), tags="dynamic")
         if self.paused:
             self._draw_pause_overlay()
+        self._scale_scene_items("dynamic")
 
     def _screen_trolley_x(self) -> float:
         return MAST_PIVOT + (self.trolley_x - MAST_PIVOT) * self.orientation
 
+    def trolley_radius(self) -> float:
+        return scene_radius(self._screen_trolley_x())
+
     def _draw_beam(self, x: float, top: float, weight: int, tag: str) -> None:
+        if tag.startswith("beam-"):
+            self.scene.create_line(x, 481, x, 499, fill="#293b43", width=3, tags=("dynamic", tag))
+            self.scene.create_line(x - 12, 499, x + 12, 499, fill="#293b43", width=3, tags=("dynamic", tag))
         self.scene.create_rectangle(x - 32, top, x + 33, top + 13, fill="#9ba8a7", outline="#33464e", width=2, tags=("dynamic", tag))
         self.scene.create_line(x - 21, top, x - 21, top + 13, fill="#4c616a", width=2, tags=("dynamic", tag))
         self.scene.create_line(x + 21, top, x + 21, top + 13, fill="#4c616a", width=2, tags=("dynamic", tag))
@@ -702,29 +744,31 @@ class HighSteelApp:
             self.scene.create_rectangle(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
                                         outline=color, width=stroke, dash=dash, tags="dynamic")
             self.scene.create_text(x, y + 4, text=f"TARGET 0{index + 1}", fill="#d5f7f4",
-                                   font=("Segoe UI", 7, "bold"), tags="dynamic")
+                                   font=("Segoe UI", 10, "bold"), tags="dynamic")
 
     def _draw_worker(self) -> None:
         x = 746 + self.worker_x_offset
-        y = 280 + abs(math.sin(time.monotonic() * 3.4)) * 2
-        self.scene.create_line(x - 6, y + 27, x - 11, y + 45, fill="#35444a", width=4, tags="dynamic")
-        self.scene.create_line(x + 2, y + 27, x + 11, y + 44, fill="#35444a", width=4, tags="dynamic")
-        self.scene.create_polygon(x - 8, y + 8, x + 7, y + 8, x + 12, y + 29, x - 12, y + 29,
+        y = 247.5 + abs(math.sin(self.run_elapsed * 3.4)) * 2
+        self.scene.create_line(x - 6, y + 36, x - 11, y + 61, fill="#35444a", width=4, tags="dynamic")
+        self.scene.create_line(x + 2, y + 36, x + 11, y + 60, fill="#35444a", width=4, tags="dynamic")
+        self.scene.create_polygon(x - 8, y + 11, x + 7, y + 11, x + 12, y + 39, x - 12, y + 39,
                                   fill="#c7463b", outline="#792f2b", width=2, tags="dynamic")
-        self.scene.create_line(x - 6, y + 10, x - 12, y + 20, fill="#c7463b", width=4, tags="dynamic")
-        self.scene.create_line(x + 7, y + 10, x + 16, y + 17, fill="#c7463b", width=4, tags="dynamic")
-        self.scene.create_oval(x - 7, y - 7, x + 7, y + 7, fill="#bd8565", outline="#644c43", width=2, tags="dynamic")
-        self.scene.create_polygon(x - 8, y - 4, x + 8, y - 4, x + 5, y - 10, x - 5, y - 10,
+        self.scene.create_line(x - 6, y + 13, x - 12, y + 27, fill="#c7463b", width=4, tags="dynamic")
+        self.scene.create_line(x + 7, y + 13, x + 16, y + 23, fill="#c7463b", width=4, tags="dynamic")
+        self.scene.create_oval(x - 7, y - 9, x + 7, y + 9, fill="#bd8565", outline="#644c43", width=2, tags="dynamic")
+        self.scene.create_polygon(x - 8, y - 5, x + 8, y - 5, x + 5, y - 13, x - 5, y - 13,
                                   fill="#f2bd54", outline="#805b2b", width=2, tags="dynamic")
-        self.scene.create_line(x + 15, y + 14, x + 21, y + 7, fill="#8d6940", width=3, tags="dynamic")
+        self.scene.create_line(x + 15, y + 19, x + 21, y + 9, fill="#8d6940", width=3, tags="dynamic")
 
     def _draw_automatic_crane(self) -> None:
         trolley_x = self.auto_x
         beam_y = self.auto_y
-        self.scene.create_line(trolley_x, 222, trolley_x, beam_y - 5, fill="#273943", width=3, tags="dynamic")
-        self.scene.create_rectangle(trolley_x - 20, 197, trolley_x + 20, 222, fill="#d4a956", outline="#5a4b31", width=3, tags="dynamic")
-        self.scene.create_line(trolley_x - 15, 224, trolley_x - 15, 231, fill="#51452f", width=4, tags="dynamic")
-        self.scene.create_line(trolley_x + 13, 224, trolley_x + 13, 231, fill="#51452f", width=4, tags="dynamic")
+        self.scene.create_line(trolley_x, auto_scene_y(222), trolley_x, beam_y - 48, fill="#273943", width=3, tags="dynamic")
+        self.scene.create_rectangle(trolley_x - 20, auto_scene_y(197), trolley_x + 20, auto_scene_y(222), fill="#d4a956", outline="#5a4b31", width=3, tags="dynamic")
+        self.scene.create_line(trolley_x - 15, auto_scene_y(221), trolley_x - 15, auto_scene_y(231), fill="#51452f", width=4, tags="dynamic")
+        self.scene.create_line(trolley_x + 13, auto_scene_y(221), trolley_x + 13, auto_scene_y(231), fill="#51452f", width=4, tags="dynamic")
+        self.scene.create_rectangle(trolley_x - 9, beam_y - 48, trolley_x + 9, beam_y - 22, fill="#a8b2ae", outline="#394951", width=2, tags="dynamic")
+        self.scene.create_rectangle(trolley_x - 12, beam_y - 22, trolley_x + 12, beam_y - 8, fill="#56686e", outline="#394951", width=1, tags="dynamic")
         self.scene.create_rectangle(trolley_x - 41, beam_y - 7, trolley_x + 41, beam_y + 7, fill="#c4a65f", outline="#554a36", width=2, tags="dynamic")
         if self.auto_placements:
             layout = TOWER_LAYOUTS[self.level - 1]
@@ -759,7 +803,7 @@ class HighSteelApp:
             y = bottom - (capacity - 5000) / 15000 * (bottom - top)
             points.extend((x, y))
         canvas.create_line(*points, fill="#77d9df", width=2)
-        radius = scene_radius(self._load_x())
+        radius = self.trolley_radius()
         capacity = capacity_at_radius(radius)
         x = left + radius / 150 * (right - left)
         cap_y = bottom - (capacity - 5000) / 15000 * (bottom - top)
@@ -786,7 +830,7 @@ class HighSteelApp:
         self.stat_values["high"].configure(text=f"{self.high_score:,}", fg="#ffffff" if record_flash else "#ffd987",
                                             bg="#57462d" if record_flash else "#142631")
         self.stat_values["level"].configure(text=f"{self.level} / 5")
-        radius = scene_radius(self._load_x())
+        radius = self.trolley_radius()
         capacity = capacity_at_radius(radius)
         percent = self.beams[self.carried]["weight"] / capacity * 100 if self.carried is not None else 0.0
         self.stat_values["radius"].configure(text=f"{radius:.1f} ft")

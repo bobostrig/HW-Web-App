@@ -37,9 +37,17 @@ foreach ($i in 0..4) {
     $variant = [regex]::Replace($variant, '(<path id="tower-braces" )d="[^"]+"', [System.Text.RegularExpressions.MatchEvaluator]{ param($m) $m.Groups[1].Value + 'd="' + $brace + '"' })
     $variant = [regex]::Replace($variant, '(<path id="tower-gold-braces" )d="[^"]+"', [System.Text.RegularExpressions.MatchEvaluator]{ param($m) $m.Groups[1].Value + 'd="' + $brace + '"' })
     $svgPath = Join-Path $assetDir "scene-level-$($i + 1).svg"
-    $pngPath = Join-Path $assetDir "scene-level-$($i + 1).png"
     [System.IO.File]::WriteAllText($svgPath, $variant, [System.Text.UTF8Encoding]::new($false))
-    $uri = ([System.Uri](Get-Item -LiteralPath $svgPath).FullName).AbsoluteUri
-    & $edge --headless=old --no-sandbox --disable-gpu --disable-gpu-sandbox --disable-software-rasterizer --disable-features=VizDisplayCompositor --hide-scrollbars --force-device-scale-factor=1 --window-size=1440,660 --user-data-dir="$(Join-Path $assetDir 'edge-profile')" --screenshot="$pngPath" $uri | Out-Null
-    if (-not (Test-Path -LiteralPath $pngPath)) { throw "Edge did not render $pngPath" }
+    foreach ($percent in @(60, 70, 80, 90, 100)) {
+        $width = [int](1440 * $percent / 100)
+        $height = [int](660 * $percent / 100)
+        $scaled = $variant.Replace('<svg class="scene" width="1440" height="660"', "<svg class=`"scene`" width=`"$width`" height=`"$height`"")
+        $renderPath = Join-Path $assetDir 'scene-render.svg'
+        $pngPath = Join-Path $assetDir "scene-level-$($i + 1)-$percent.png"
+        [System.IO.File]::WriteAllText($renderPath, $scaled, [System.Text.UTF8Encoding]::new($false))
+        $uri = ([System.Uri](Get-Item -LiteralPath $renderPath).FullName).AbsoluteUri
+        & $edge --headless=old --no-sandbox --disable-gpu --disable-gpu-sandbox --disable-software-rasterizer --disable-features=VizDisplayCompositor --hide-scrollbars --force-device-scale-factor=1 --window-size="$width,$height" --user-data-dir="$(Join-Path $assetDir 'edge-profile')" --screenshot="$pngPath" $uri | Out-Null
+        if (-not (Test-Path -LiteralPath $pngPath)) { throw "Edge did not render $pngPath" }
+    }
 }
+Remove-Item -LiteralPath (Join-Path $assetDir 'scene-render.svg')

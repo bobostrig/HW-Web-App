@@ -7,7 +7,7 @@ Use either the arrow keys or WASD. Left and right move the trolley along the pla
 
 ### Crane capacity by load radius
 
-Measure the horizontal distance from the crane's center of rotation to the beam. Let `r` be the radius in feet and `C(r)` the maximum permitted beam weight in pounds. In the game scene, 500 horizontal scene units represent the full 150 ft boom reach: `r = min(150, |x - x_mast| * 150 / 500)`.
+Measure the horizontal distance from the crane's center of rotation to the trolley. Let `r` be the radius in feet and `C(r)` the maximum permitted beam weight in pounds. In the game scene, 500 horizontal scene units represent the full 150 ft boom reach: `r = min(150, |x_trolley - x_mast| * 150 / 500)`. Cable and hook sway do not change the load radius.
 
 | Load radius | Maximum beam weight |
 |---:|---:|
@@ -130,27 +130,23 @@ Capacity calculations were checked with the independent JavaScript reference val
 
 ### Step 1 — Desktop shell, source artwork, and capacity curve
 
-- Reference calculations passed for all eight numeric checks above.
-- All 315 tested pickup positions across the five levels were below the minimum route capacity.
-- The five desktop scene backgrounds were rendered from the inline SVG in `index.html` and checked at 1440 × 660 pixels.
-- Python/Tkinter launch and GUI interaction: **Not run**; no accessible Python interpreter is available in the current environment.
+- `node 02_validation/validate_desktop.js 1` passed the eight reference capacity calculations above. This verifies the expected curve; it does not execute the Python calculation.
+- The five desktop scene backgrounds were rendered from the inline SVG in `index.html` at 60%, 70%, 80%, 90%, and 100% size. All 25 image dimensions match their expected values, and the tower rows vary by level.
+- Source SVG screen coordinates were checked against the native overlays: player trolley top 38.1 px, player boom cable start 74.5 px, automatic trolley top 56.2 px, and automatic boom cable start 92.4 px. The Tkinter drawing now applies those transforms.
+- The stats and graph occupy a dedicated bottom row, with smaller stat cards. The entire construction scene chooses the largest image scale that fits the screen height and width. The scene no longer needs scrolling, so the crane bases and beams remain visible together with the graph.
+- A 70% scene image was visually inspected after regenerating the assets; its sky, crane tops, tower, crane bases, and ground all extend to the image edges without cropping.
+- The graph marker, radius and capacity readouts, and overload threshold now use the trolley position. A swaying cable does not shift the graph marker.
+- Python/Tkinter launch and visual GUI inspection: **Pending**. The available `python`, `py`, and `python3` commands are inaccessible Windows app aliases.
 
 ![Step 1 capacity validation graph](03_output/capacity-validation-step-1.svg)
 
 ### Step 2 — Gameplay and desktop features
 
-- Reference capacity and route checks passed again; desktop source checks found the expected capacity chart, graph, and checkpoint fields.
-- Portable save/load and live graph code are present. Interactive save dialogs, checkpoint transfer, and live graph refresh: **Not run** without Python/Tkinter.
-
-![Step 2 capacity validation graph](03_output/capacity-validation-step-2.svg)
+Pending sequential review. Gameplay and desktop feature code was drafted earlier, but its validation and graph will be recorded when step 2 is reviewed.
 
 ### Step 3 — Final review
 
-- `node 02_validation/validate_desktop.js`: **Pass** for all eight capacity checks, 315 route cases, desktop source checks, and all five scene asset dimensions.
-- `python -m unittest discover -s 02_validation`: **Not run** because Python is unavailable in the current environment. Run this command when a Python 3 installation with Tkinter is available.
-- Full keyboard, hazard, save/load, and visual GUI acceptance checks remain pending until the app can be launched.
-
-![Step 3 capacity validation graph](03_output/capacity-validation-step-3.svg)
+Pending sequential review. The full acceptance checks and final graph will be recorded after step 3.
 ## Out of scope
 
 - This is a simple game for fun, not a real crane simulator, operator training tool, or source of real-world safety guidance.
@@ -179,7 +175,7 @@ Capacity calculations were checked with the independent JavaScript reference val
 
 ## Desktop Features
 - **Portable progress checkpoint:** Pause the game and choose Save Progress to create a JSON save file. Load that file on another computer to continue from the saved level checkpoint. The save preserves the level, remaining time, score, and placed targets. Loading regenerates the remaining beams and resets the trolley, hook, crane orientation, hazards, and animations.
-- **Live stress graph:** Show a real-time capacity-versus-radius graph along the bottom beside the other statistics. Mark the current radius and the carried beam's weight on the interpolated crane capacity curve, and display the current capacity percentage. The graph updates as the trolley moves.
+- **Live stress graph:** Show a real-time capacity-versus-radius graph along the bottom beside the other statistics. Mark the trolley radius and the carried beam's weight on the interpolated crane capacity curve, and display the current capacity percentage. The graph marker follows the trolley, independent of cable and hook sway.
 
 ## Desktop App Implementation
 

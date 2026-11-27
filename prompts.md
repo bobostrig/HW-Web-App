@@ -226,5 +226,25 @@
 
 ## 54. Implement the three-step desktop app plan
 - **What you asked:** Implement the finalized Tkinter desktop plan while preserving the web app and recording validation results and graphs after each step.
-- **What changed:** Added the native Tkinter game source, five SVG-derived scene backgrounds, portable paused-level checkpoint save/load, a live capacity curve, desktop validation scripts, three milestone graphs, the three-step plan in `spec.md`, and retrospective request entries in this log. Updated the project instructions for the desktop folder.
-- **Whether it worked:** The independent reference validator passed all eight capacity checks and 315 beam-route checks. `index.html` is unchanged. Python GUI and Python unit tests could not be run because this environment has no accessible Python interpreter; those checks are marked pending in `spec.md`.
+- **What changed:** Drafted native Tkinter game source, five SVG-derived scene backgrounds, portable checkpoint save/load, and the live curve. Added desktop validation scripts, the three-step plan in `spec.md`, and retrospective request entries. Updated the project instructions for the desktop folder.
+- **Whether it worked:** Earlier reference checks passed eight capacity cases and 315 beam-route cases, but the app could not be launched because this environment has no accessible Python interpreter. The user requested a separate review of each step before treating later steps as complete.
+
+## 55. Review only desktop implementation step 1
+- **What you asked:** Go through the three desktop steps one at a time, starting with the native app and graphics in step 1.
+- **What changed:** Corrected the player trolley, hook cable, automatic trolley, and worker overlay positions to use the original SVG screen transforms. Limited the formal validation report and graph to step 1; step 2 and step 3 are marked pending in `spec.md`.
+- **Whether it worked:** The step 1 reference calculations and asset checks pass. Launching the Tkinter window for visual confirmation is still pending because Python is unavailable in the current environment.
+
+## 56. Keep the full graph visible at the bottom
+- **What you asked:** Fix the desktop graph, which was cut off at the bottom of the window.
+- **What changed:** Reserved a dedicated bottom row for the stats and graph, arranged the stats in a compact grid, shortened the graph title, and added scrolling to the fixed-size scene when the window is shorter than the artwork.
+- **Whether it worked:** Step 1 reference checks and source-layout checks pass. Visual confirmation in Tkinter remains pending because this environment cannot launch Python.
+
+## 57. Anchor the graph to the trolley
+- **What you asked:** Make the desktop graph use the trolley's position instead of the end of the cable.
+- **What changed:** Made the live graph marker, radius and capacity readouts, and overload check use the trolley radius; kept cable sway visual. Clarified the radius rule in `spec.md`.
+- **Whether it worked:** Source checks confirm the shared trolley-radius calculation is used; visual GUI confirmation remains pending without an accessible Python interpreter.
+
+## 58. Show the full construction scene beside compact stats
+- **What you asked:** Restore the bottom of the crane and visible beams while keeping the full graph at the bottom; make the stats smaller.
+- **What changed:** Generated scaled versions of the original SVG artwork for each level, made the desktop window choose the largest full-scene size that fits the display, scaled the native overlays with it, removed scene scrolling, and condensed the stat cards to two rows.
+- **Whether it worked:** All 25 image dimensions and source-layout checks pass; the 70% scene image was visually inspected with the complete crane and ground visible. Visual confirmation in Tkinter remains pending because Python cannot be launched in this environment.
