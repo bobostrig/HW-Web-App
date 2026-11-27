@@ -112,6 +112,45 @@ When capacity reaches 90%, make the capacity percentage box flash red. Make the 
 - 75.01 ft: interpolate between 75 ft and 100 ft, giving approximately 12,998 lb.
 - 112 ft: interpolate between 100 ft and 125 ft, giving 8,040 lb; the 90% warning threshold is 7,236 lb.
 - 150 ft: capacity is 5,500 lb. A 5,750 lb challenge beam exceeds capacity at 150 ft, but remains below the approximately 7,160 lb route capacity at a 123 ft target radius.
+
+## Validation Results
+
+Capacity calculations were checked with the independent JavaScript reference validator in `02_validation/validate_desktop.js`. The Python implementation contains the same chart points and interpolation formula, but could not be executed in this environment because the available Python commands are Windows app aliases without an accessible interpreter.
+
+| Validation case | Expected | Reference result | Result |
+|---|---:|---:|---|
+| 50 ft capacity | 20,000 lb | 20,000 lb | Pass |
+| 62.5 ft capacity | 16,500 lb | 16,500 lb | Pass |
+| 74.99 ft capacity | 13,003 lb | 13,002.8 lb | Pass (rounds to 13,003) |
+| 75.01 ft capacity | 12,998 lb | 12,998.4 lb | Pass (rounds to 12,998) |
+| 112 ft capacity | 8,040 lb | 8,040 lb | Pass |
+| 90% threshold at 112 ft | 7,236 lb | 7,236 lb | Pass |
+| 123 ft route capacity | 7,160 lb | 7,160 lb | Pass |
+| 150 ft capacity | 5,500 lb | 5,500 lb | Pass |
+
+### Step 1 — Desktop shell, source artwork, and capacity curve
+
+- Reference calculations passed for all eight numeric checks above.
+- All 315 tested pickup positions across the five levels were below the minimum route capacity.
+- The five desktop scene backgrounds were rendered from the inline SVG in `index.html` and checked at 1440 × 660 pixels.
+- Python/Tkinter launch and GUI interaction: **Not run**; no accessible Python interpreter is available in the current environment.
+
+![Step 1 capacity validation graph](03_output/capacity-validation-step-1.svg)
+
+### Step 2 — Gameplay and desktop features
+
+- Reference capacity and route checks passed again; desktop source checks found the expected capacity chart, graph, and checkpoint fields.
+- Portable save/load and live graph code are present. Interactive save dialogs, checkpoint transfer, and live graph refresh: **Not run** without Python/Tkinter.
+
+![Step 2 capacity validation graph](03_output/capacity-validation-step-2.svg)
+
+### Step 3 — Final review
+
+- `node 02_validation/validate_desktop.js`: **Pass** for all eight capacity checks, 315 route cases, desktop source checks, and all five scene asset dimensions.
+- `python -m unittest discover -s 02_validation`: **Not run** because Python is unavailable in the current environment. Run this command when a Python 3 installation with Tkinter is available.
+- Full keyboard, hazard, save/load, and visual GUI acceptance checks remain pending until the app can be launched.
+
+![Step 3 capacity validation graph](03_output/capacity-validation-step-3.svg)
 ## Out of scope
 
 - This is a simple game for fun, not a real crane simulator, operator training tool, or source of real-world safety guidance.
@@ -132,4 +171,20 @@ When capacity reaches 90%, make the capacity percentage box flash red. Make the 
 5. **Add hazards and failure behavior.** Animate the automatic crane moving its trolley and placing beams at the lower, middle, and upper parts of the tower so its load sometimes blocks a player target until it moves clear. Animate the red worker walking on the tower. If the player's hook or beam collides with the worker or the automatic crane's moving beam, subtract 10 points and show a large red “-10” popup without stopping the level. Fly birds across the scene at varying altitudes; a bird strike makes the cable and hook sway wildly whether or not a beam is attached, and any carried beam swings until it settles.
 6. **Add the high score and finish the presentation.** Save and display the high score locally in the browser. Refine the realistic, medium-detail visuals, animations, feedback, and screen layout.
 
-## Published
+## Platform
+
+- The web app remains available at the project root as `index.html`.
+- The desktop version is a separate native Python Tkinter app in `04_desktop/`; run it from the project root with `python 04_desktop/app.py`.
+- Python 3.9 or later with Tkinter is required. Desktop high score is saved locally on that computer and is separate from portable game checkpoints.
+
+## Desktop Features
+- **Portable progress checkpoint:** Pause the game and choose Save Progress to create a JSON save file. Load that file on another computer to continue from the saved level checkpoint. The save preserves the level, remaining time, score, and placed targets. Loading regenerates the remaining beams and resets the trolley, hook, crane orientation, hazards, and animations.
+- **Live stress graph:** Show a real-time capacity-versus-radius graph along the bottom beside the other statistics. Mark the current radius and the carried beam's weight on the interpolated crane capacity curve, and display the current capacity percentage. The graph updates as the trolley moves.
+
+## Desktop App Implementation
+
+1. **Build the native app and match the web graphics.** Create the Tkinter window and scene using the same construction artwork, colors, proportions, and level layouts as `index.html`. Keep `index.html` untouched. Add the bottom statistics and live graph area. Check the scene and capacity calculations.
+2. **Port gameplay and implement desktop features.** Add crane movement, beam handling, safe capacity logic, five-level progression, scoring, high score, worker collisions, bird-triggered sway, the automatic crane, pause, failure, and restart behavior. Add portable paused checkpoint save/load and the live graph. Check the game rules, graph, and checkpoint data flow.
+3. **Polish and complete acceptance checks.** Review the desktop controls and visual behavior. Check all capacity and route cases, gameplay hazards, pause and timer behavior, high score, save/load between computers, failure/restart flows, and level completion. Record results and the capacity graph for this step.
+
+After each step, run the applicable validations, record expected and actual results here, and embed that step's capacity graph above. Mark checks for unfinished features as pending. Save graph artifacts under `03_output/`; use `02_validation/` for validation scripts and test cases.

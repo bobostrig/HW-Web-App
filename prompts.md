@@ -193,3 +193,38 @@
 - **What you asked:** Make the tower layout change at each level and make the later layouts harder.
 - **What changed:** Added five tower layouts with different crossbeam spacing and staggered target positions; narrowed the openings from 144 scene units on level 1 to 66 on level 5. Updated target alignment, auto-crane interference, tower bolts, and collapse debris to follow the active layout. Updated `spec.md` and the level-start message.
 - **Whether it worked:** Each level now loads its own structural layout and progressively tighter targets.
+
+## 48. Review the project before desktop work
+- **What you asked:** Read the project files, including the updated validation and feature requirements, without editing anything, then ask questions.
+- **What changed:** Reviewed `AGENTS.md`, `spec.md`, `prompts.md`, `index.html`, and the folder README files. No project files were changed during that review.
+- **Whether it worked:** The existing game and validation requirements were reviewed before planning the desktop version.
+
+## 49. Define the desktop app direction
+- **What you asked:** Rebuild the web game as a native Python Tkinter desktop app, continue logging requests here, put validation results in `spec.md`, and keep `index.html` available untouched.
+- **What changed:** Set the desktop app as a separate deliverable. Kept the existing web app in scope for preservation and identified `prompts.md` and `spec.md` as the request and validation records.
+- **Whether it worked:** The app structure and documentation updates are implemented; the Python GUI could not be run in the current environment because only inaccessible Windows app aliases were available.
+
+## 50. Carry the two game features into desktop planning
+- **What you asked:** Include the worker hazard and bird-triggered load sway, and check validations after each implementation step with a graph in `spec.md`.
+- **What changed:** Added the worker collision and bird-sway behavior to the desktop implementation. Added per-step capacity graph artifacts and validation reporting to the implementation plan.
+- **Whether it worked:** Both behaviors are represented in the desktop app code; runtime GUI verification remains pending until Python/Tkinter can run.
+
+## 51. Specify portable checkpoint saves and the live stress graph
+- **What you asked:** Add a paused-game save that can be moved to another computer and a live graph showing the load on the crane capacity curve.
+- **What changed:** Added portable JSON save/load. A checkpoint preserves level, timer, score, and placed targets; loading regenerates remaining beams and resets active movement and hazards. Added a live capacity-versus-radius graph at the bottom beside the stats.
+- **Whether it worked:** Save/load validation is implemented in the app and statically reviewed; interactive file-dialog verification is pending.
+
+## 52. Set the three desktop implementation steps
+- **What you asked:** Use three implementation steps and place the finalized plan in the Desktop App Implementation section of `spec.md`.
+- **What changed:** Organized the work into scene/app foundation, gameplay and desktop features, then polish and acceptance checks. Added validation checkpoints after each step.
+- **Whether it worked:** The three-step plan is now in `spec.md`.
+
+## 53. Match the existing web graphics
+- **What you asked:** Use the same graphics as `index.html` and retrospectively add the missing conversation requests to this log.
+- **What changed:** Rendered the original SVG scene into level-specific desktop background assets and added the unlogged planning requests to this file.
+- **Whether it worked:** The static construction scene uses the source SVG artwork; the web file remains unchanged.
+
+## 54. Implement the three-step desktop app plan
+- **What you asked:** Implement the finalized Tkinter desktop plan while preserving the web app and recording validation results and graphs after each step.
+- **What changed:** Added the native Tkinter game source, five SVG-derived scene backgrounds, portable paused-level checkpoint save/load, a live capacity curve, desktop validation scripts, three milestone graphs, the three-step plan in `spec.md`, and retrospective request entries in this log. Updated the project instructions for the desktop folder.
+- **Whether it worked:** The independent reference validator passed all eight capacity checks and 315 beam-route checks. `index.html` is unchanged. Python GUI and Python unit tests could not be run because this environment has no accessible Python interpreter; those checks are marked pending in `spec.md`.

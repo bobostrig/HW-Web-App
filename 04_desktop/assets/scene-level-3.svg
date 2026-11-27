@@ -1,0 +1,178 @@
+<svg class="scene" width="1440" height="660" viewBox="0 0 1440 660" role="img" aria-labelledby="scene-title scene-desc" xmlns="http://www.w3.org/2000/svg">
+        <style>#player-trolley,#beam-1,#beam-2,#beam-3,#worker-walk,#auto-trolley,#auto-beam,#bird-strike,#crash-overlay,#debris,#target-1,#target-2,#target-3,#target-label-1,#target-label-2,#target-label-3,#tower-bolts{display:none!important}</style><title id="scene-title">Tower crane construction site</title>
+        <desc id="scene-desc">A player crane and an automatic crane work on a three-level steel tower above a city skyline. Three steel beams await placement.</desc>
+        <defs>
+          <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#7393a0"/><stop offset=".58" stop-color="#c1b9a7"/><stop offset="1" stop-color="#e0c69e"/></linearGradient>
+          <linearGradient id="steel" x2="1" y2="1"><stop stop-color="#8799a0"/><stop offset=".48" stop-color="#435864"/><stop offset="1" stop-color="#243844"/></linearGradient>
+          <linearGradient id="boom" x2="0" y2="1"><stop stop-color="#f3c676"/><stop offset="1" stop-color="#b47a36"/></linearGradient>
+          <linearGradient id="ground" x2="0" y2="1"><stop stop-color="#59615e"/><stop offset="1" stop-color="#272f31"/></linearGradient>
+          <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#fff" stroke-opacity=".035"/></pattern>
+          <filter id="soft-shadow" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur stdDeviation="8"/></filter>
+        </defs>
+
+        <!-- Sky and distant city -->
+        <rect width="1440" height="660" fill="url(#sky)"/>
+        <rect width="1440" height="500" fill="url(#grid)"/>
+        <circle cx="1180" cy="116" r="45" fill="#f8dfa8" opacity=".44"/>
+        <g fill="#526b77" opacity=".55">
+          <path d="M0 409h68V263h53v146h25V305h85v104h37V220h61v189h36V286h83v123h31V247h72v162h52V310h68v99h36V194h68v215h42V270h95v139h36V234h65v175h40V303h90v106h42V251h78v158h31V282h77v127h44v106H0z"/>
+        </g>
+        <g fill="#b3b7aa" opacity=".55">
+          <path d="M40 440h43V302h16v138h112V351h18v89h82V268h17v172h151V321h15v119h114V288h18v152h137V252h18v188h97V334h17v106h133V294h19v146h115V313h17v127h98V278h18v162h111v65H0z"/>
+        </g>
+        <g fill="#f4dca9" opacity=".4">
+          <path d="M49 316h7v10h-7zm18 0h7v10h-7zm-18 20h7v10h-7zm18 0h7v10h-7zm-18 20h7v10h-7zm18 0h7v10h-7zM301 286h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zM442 339h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zM728 267h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zM1056 309h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zM1283 295h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8zm-20 22h8v11h-8zm20 0h8v11h-8z"/>
+        </g>
+        <g stroke="#d7c9aa" stroke-width="2" opacity=".28">
+          <path d="M282 285v139M291 285v139M421 326v98M430 326v98M710 258v166M721 258v166M1038 300v124M1048 300v124M1267 285v139"/>
+        </g>
+        <rect y="455" width="1440" height="205" fill="#34454b" opacity=".35"/>
+
+        <!-- Site background equipment -->
+        <g opacity=".52" stroke="#34434a" fill="none" stroke-width="5">
+          <path d="M110 510v-72m-18 72h36m-30-58h24l-12-18zM1280 510v-86m-19 86h38m-31-67h24l-12-19z"/>
+          <path d="M130 457h72m1073 5h84" stroke-width="3"/>
+        </g>
+
+        <!-- Base shadows and ground -->
+        <ellipse cx="717" cy="585" rx="484" ry="27" fill="#101b20" opacity=".38" filter="url(#soft-shadow)"/>
+        <rect y="510" width="1440" height="150" fill="url(#ground)"/>
+        <path d="M0 511h1440" stroke="#d6c29c" stroke-opacity=".65" stroke-width="3"/>
+        <path d="M0 546h1440M0 624h1440" stroke="#b8a980" stroke-opacity=".13" stroke-width="2"/>
+        <g stroke="#c5b58e" stroke-opacity=".16" stroke-width="2">
+          <path d="m70 660 80-148m125 148 52-148m235 148 18-148m433 148-28-148m233 148-58-148m150 148-29-148"/>
+        </g>
+
+        <!-- Tower foundation -->
+        <g transform="translate(0 510) scale(1 1.5) translate(0 -510)">
+          <path d="M587 510h266l-21 24H609z" fill="#26343a"/>
+          <path d="M612 510h18v-30h-18zm195 0h18v-30h-18z" fill="#59676b"/>
+          <path d="M605 480h224v13H605z" fill="#829095"/>
+        </g>
+
+        <g id="tower-collapse">
+        <!-- Unfinished tower: legs, cross braces, three highlighted bays -->
+        <g transform="translate(0 510) scale(1 1.5) translate(0 -510)" stroke="url(#steel)" stroke-linecap="square">
+          <path id="tower-columns" d="M625 480V261M815 480V261" fill="none" stroke-width="17"/>
+          <path id="tower-crossbeams" d="M617 458 h206 M617 398 h206 M617 318 h206 M617 261 h206" fill="none" stroke="#9aa6a6" stroke-width="12"/>
+          <path id="tower-braces" d="M625 458 L815 398 M815 458 L625 398 M625 398 L815 318 M815 398 L625 318 M625 318 L815 261 M815 318 L625 261" fill="none" stroke="#586e78" stroke-width="7"/>
+          <path id="tower-gold-braces" d="M625 458 L815 398 M815 458 L625 398 M625 398 L815 318 M815 398 L625 318 M625 318 L815 261 M815 318 L625 261" fill="none" stroke="#c8b17f" stroke-opacity=".76" stroke-width="3"/>
+        </g>
+        <g transform="translate(0 510) scale(1 1.5) translate(0 -510)" fill="#d8c69a" stroke="#495c64" stroke-width="1.5">
+          <circle cx="625" cy="458" r="3"/><circle cx="815" cy="458" r="3"/>
+          <circle cx="625" cy="376" r="3"/><circle cx="815" cy="376" r="3"/>
+          <circle cx="625" cy="294" r="3"/><circle cx="815" cy="294" r="3"/>
+          <circle cx="625" cy="261" r="3"/><circle cx="815" cy="261" r="3"/>
+        </g>
+        <g transform="translate(0 510) scale(1 1.5) translate(0 -510)" fill="none" stroke="#77d9df" stroke-width="3" stroke-dasharray="7 6" opacity=".9">
+          <rect id="target-1" x="648" y="397" width="144" height="27" rx="3"/>
+          <rect id="target-2" x="648" y="315" width="144" height="27" rx="3"/>
+          <rect id="target-3" x="648" y="267" width="144" height="15" rx="3"/>
+        </g>
+        <g transform="translate(0 510) scale(1 1.5) translate(0 -510)" fill="#d5f7f4" font-size="10" font-weight="800" letter-spacing="1.5" text-anchor="middle">
+          <text id="target-label-1" x="720" y="416">TARGET 01</text><text id="target-label-2" x="720" y="334">TARGET 02</text><text id="target-label-3" x="720" y="279">TARGET 03</text>
+        </g>
+        <g id="tower-bolts" transform="translate(0 510) scale(1 1.5) translate(0 -510)" fill="#d8c69a" stroke="#495c64" stroke-width="1.5"></g>
+        <g id="auto-placed-beams" aria-hidden="true"></g>
+        <path d="M625 261V230m190 31v-31" transform="translate(0 510) scale(1 1.5) translate(0 -510)" stroke="#819196" stroke-width="8"/>
+        </g>
+
+        <!-- Player crane on the left -->
+        <g id="player-crane" transform="translate(0 510) scale(1 1.3) translate(0 -510)">
+          <path d="M286 510V168M334 510V168" fill="none" stroke="#354951" stroke-width="9"/>
+          <path d="M286 470h48m-48-48h48m-48-48h48m-48-48h48m-48-48h48m-48-48h48" fill="none" stroke="#8a9998" stroke-width="5"/>
+          <path d="m286 470 48-48m-48 0 48 48m-48-96 48-48m-48 0 48 48m-48-96 48-48m-48 0 48 48" fill="none" stroke="#526870" stroke-width="3"/>
+          <path d="M221 156H817M221 175H810m0-19-20 19m-42-19-20 19m-42-19-20 19m-42-19-20 19m-42-19-20 19m-42-19-20 19m-42-19-20 19m-42-19-20 19m-42-19-20 19m-42-19-20 19" fill="none" stroke="url(#boom)" stroke-width="5"/>
+          <path d="M335 160h452" stroke="#785d37" stroke-opacity=".75" stroke-width="2"/>
+          <path d="M190 130h39v45h-39z" fill="#66594a" stroke="#3c4140" stroke-width="4"/>
+          <path d="M195 138h29v6h-29m0 10h29v6h-29m0 10h29v6h-29" stroke="#b49a6a" stroke-width="2"/>
+          <g id="player-trolley">
+            <path d="M507 147h42v28h-42z" fill="#efbd66" stroke="#725834" stroke-width="4"/>
+            <path d="M511 153h34v5h-34z" fill="#ffe1a0" opacity=".7"/>
+            <circle cx="515" cy="177" r="5" fill="#705c3b"/><circle cx="541" cy="177" r="5" fill="#705c3b"/>
+            <path id="hoist-line" d="M528 175v158" stroke="#273943" stroke-width="3"/>
+            <g id="hook" transform="translate(0 0)">
+              <path d="M519 332h18l-2 18h-14z" fill="#a8b2ae" stroke="#394951" stroke-width="3"/>
+              <path d="M515 352h25l-4 12h-18z" fill="#56686e"/>
+            </g>
+            <circle cx="528" cy="168" r="5" fill="#ffdf91"/>
+          </g>
+        </g>
+
+        <!-- Pickup beams stay within the player crane's main boom reach -->
+        <g id="beam-1" transform="translate(270 0)">
+          <path class="beam-stand" d="M0 499v-18m-12 18h24" stroke="#293b43" stroke-width="3"/>
+          <rect x="-32" y="465" width="65" height="13" rx="2" fill="#9ba8a7" stroke="#33464e" stroke-width="3"/>
+          <path d="M-21 465v13m43-13v13" stroke="#4c616a" stroke-width="3"/>
+          <rect x="-42" y="440" width="84" height="23" rx="11" fill="#14252e" stroke="#61747a"/>
+          <text id="beam-weight-1" x="0" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">8,000 lb</text>
+        </g>
+        <g id="beam-2" transform="translate(500 0)">
+          <path class="beam-stand" d="M0 499v-18m-12 18h24" stroke="#293b43" stroke-width="3"/>
+          <rect x="-32" y="465" width="65" height="13" rx="2" fill="#879797" stroke="#33464e" stroke-width="3"/>
+          <path d="M-21 465v13m43-13v13" stroke="#4c616a" stroke-width="3"/>
+          <rect x="-42" y="440" width="84" height="23" rx="11" fill="#14252e" stroke="#61747a"/>
+          <text id="beam-weight-2" x="0" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">6,500 lb</text>
+        </g>
+        <g id="beam-3" transform="translate(620 0)">
+          <path class="beam-stand" d="M0 499v-18m-12 18h24" stroke="#293b43" stroke-width="3"/>
+          <rect x="-32" y="465" width="65" height="13" rx="2" fill="#aab5b0" stroke="#33464e" stroke-width="3"/>
+          <path d="M-21 465v13m43-13v13" stroke="#4c616a" stroke-width="3"/>
+          <rect x="-42" y="440" width="84" height="23" rx="11" fill="#14252e" stroke="#61747a"/>
+          <text id="beam-weight-3" x="0" y="456" fill="#e9f0eb" text-anchor="middle" font-size="12.5" font-weight="700">5,000 lb</text>
+        </g>
+        <!-- Worker on a tower beam -->
+        <g id="worker-walk">
+        <g id="tower-worker" transform="translate(0 510) scale(1 1.5) translate(0 -510) translate(746 335) scale(1 .9)" stroke-linecap="round" stroke-linejoin="round">
+          <path id="worker-legs" d="M-6 27v18m8-18 9 17" stroke="#35444a" stroke-width="5"/>
+          <path d="M-8 9h15l5 20H-12z" fill="#c7463b" stroke="#792f2b" stroke-width="2"/>
+          <path d="M-4 8-12 19m19-10 9 8" fill="none" stroke="#c7463b" stroke-width="5"/>
+          <circle cx="0" cy="0" r="7" fill="#bd8565" stroke="#644c43" stroke-width="2"/>
+          <path d="M-8-4h16l-3-5h-10z" fill="#f2bd54" stroke="#805b2b" stroke-width="2"/>
+          <path d="M15 14 21 7l3 2-6 8" stroke="#8d6940" stroke-width="3"/>
+        </g>
+        </g>
+
+        <!-- Automatic crane on the right -->
+        <g transform="translate(0 510) scale(1 1.45) translate(0 -510)">
+          <path d="M1082 510V218M1128 510V218" fill="none" stroke="#394743" stroke-width="9"/>
+          <path d="M1082 463h46m-46-48h46m-46-48h46m-46-48h46m-46-48h46m-46-48h46" fill="none" stroke="#829087" stroke-width="5"/>
+          <path d="m1082 463 46-48m-46 0 46 48m-46-96 46-48m-46 0 46 48m-46-96 46-48m-46 0 46 48" fill="none" stroke="#53635e" stroke-width="3"/>
+          <path d="M1105 204H750m0 18h355m-330-18-20 18m82-18-20 18m82-18-20 18m82-18-20 18m82-18-20 18m82-18-20 18m82-18-20 18" fill="none" stroke="url(#boom)" stroke-width="5"/>
+          <path d="M1105 204h235m0 18h-235m210-18-20 18m-54-18 20 18m-54-18 20 18m-54-18 20 18" fill="none" stroke="url(#boom)" stroke-width="5"/>
+          <path d="M780 208h300" stroke="#785d37" stroke-opacity=".75" stroke-width="2"/>
+          <path d="M1321 180h28v42h-28z" fill="#66594a" stroke="#3c4140" stroke-width="4"/>
+          <path d="M1325 188h20v5h-20m0 8h20v5h-20m0 8h20v5h-20" stroke="#b49a6a" stroke-width="2"/>
+          <g id="auto-trolley">
+            <path d="M902 197h40v25h-40z" fill="#d4a956" stroke="#5a4b31" stroke-width="4"/>
+            <circle cx="910" cy="224" r="5" fill="#51452f"/><circle cx="934" cy="224" r="5" fill="#51452f"/>
+            <path id="auto-hoist-line" d="M922 222v110" stroke="#273943" stroke-width="3"/>
+            <g id="auto-hook">
+              <path d="M913 329h18l-2 18h-14z" fill="#a8b2ae" stroke="#394951" stroke-width="3"/>
+              <path d="M909 347h25l-4 12h-18z" fill="#56686e"/>
+            </g>
+            <circle cx="922" cy="199" r="5" fill="#ffdf91"/>
+          </g>
+        </g>
+        <g id="auto-beam" transform="translate(922 260)">
+          <rect x="-41" y="-7" width="82" height="14" rx="2" fill="#c4a65f" stroke="#554a36" stroke-width="3"/>
+          <path d="M-25-7v14m50-14v14" stroke="#625539" stroke-width="3"/>
+        </g>
+
+        <!-- Black birds -->
+        <g fill="none" stroke="#18242a" stroke-width="4" stroke-linecap="round">
+          <path d="m902 116 10-9 10 9 10-9 10 9"/><path d="m977 157 8-7 8 7 8-7 8 7"/><path d="m853 176 7-6 7 6 7-6 7 6"/>
+        </g>
+        <g id="bird-strike" fill="none" stroke="#18242a" stroke-width="4" stroke-linecap="round" transform="translate(-80 205)" aria-hidden="true">
+          <path d="m0 10 10-9 10 9 10-9 10 9"/>
+        </g>
+
+        <g id="crash-overlay" display="none" text-anchor="middle">
+          <rect width="1440" height="660" fill="#08131d" opacity=".58"/>
+          <text id="failure-cause" x="720" y="286" fill="#ff766d" font-size="20" font-weight="900" letter-spacing="5">LOAD LIMIT EXCEEDED</text>
+          <text id="failure-title" x="720" y="338" fill="#fff6e7" font-size="42" font-weight="900" letter-spacing="3">LEVEL FAILED</text>
+        </g>
+        <g id="debris" display="none" aria-hidden="true"></g>
+
+        <path d="M0 510h1440" stroke="#f2dbab" stroke-opacity=".16" stroke-width="1"/>
+      </svg>
